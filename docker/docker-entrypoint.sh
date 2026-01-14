@@ -115,11 +115,6 @@ mkdir -p /app/data
 mkdir -p /app/workspaces
 mkdir -p /app/logs
 
-# 设置权限
-chmod -R 755 /app/data
-chmod -R 755 /app/workspaces
-chmod -R 755 /app/logs
-
 echo ""
 
 # ============================================
