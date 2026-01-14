@@ -89,17 +89,37 @@ WebCodeCli is fully optimized for mobile devices:
 
 ## 🚀 Quick Start
 
-### Requirements
+### Option 1: Docker One-Click Deployment (Recommended)
+
+**No configuration required, start in 30 seconds!** The system will automatically guide you through all configuration on first visit.
+
+```bash
+# Clone the project
+git clone https://github.com/xuzeyu91/WebCode.git
+cd WebCode
+
+# One-click start
+docker-compose up -d
+
+# Visit http://localhost:5000
+# First visit will automatically enter the setup wizard
+```
+
+> 📖 For detailed deployment documentation, see [DEPLOY_DOCKER.md](./DEPLOY_DOCKER.md)
+
+### Option 2: Local Development
+
+#### Requirements
 
 - .NET 10.0 SDK
 - Installed AI CLI tools (such as Claude Code CLI, Codex CLI)
 
-### Installation and Running
+#### Installation and Running
 
 ```bash
 # Clone the project
-git clone https://github.com/xuzeyu91/WebCodeCli.git
-cd WebCodeCli
+git clone https://github.com/xuzeyu91/WebCode.git
+cd WebCode
 
 # Restore dependencies
 dotnet restore
