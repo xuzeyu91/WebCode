@@ -426,6 +426,29 @@
     "changeDeleted": "삭제",
     "changeRenamed": "이름 변경"
   },
+  "login": {
+    "pageTitle": "로그인 - WebCode",
+    "subtitle": "프로그래밍 도우미 플랫폼",
+    "title": "로그인",
+    "username": "사용자 이름",
+    "usernamePlaceholder": "사용자 이름을 입력하세요",
+    "password": "비밀번호",
+    "passwordPlaceholder": "비밀번호를 입력하세요",
+    "showPassword": "비밀번호 표시",
+    "hidePassword": "비밀번호 숨기기",
+    "loggingIn": "로그인 중...",
+    "login": "로그인",
+    "footer": "© {year} WebCode. All rights reserved.",
+    "githubTitle": "GitHub 리포지토리 방문",
+    "validation": {
+      "usernameRequired": "사용자 이름을 입력하세요",
+      "passwordRequired": "비밀번호를 입력하세요"
+    },
+    "error": {
+      "invalidCredentials": "사용자 이름 또는 비밀번호가 올바르지 않습니다",
+      "loginFailed": "로그인 실패: {message}"
+    }
+  },
   "errors": {
     "networkError": "네트워크 오류, 연결을 확인하세요",
     "serverError": "서버 오류",

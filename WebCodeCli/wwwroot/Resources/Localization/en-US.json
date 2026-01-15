@@ -259,6 +259,29 @@
       "removeDuplicatesDesc": "Remove duplicated code snippets and file references"
     }
   },
+  "login": {
+    "pageTitle": "Login - WebCode",
+    "subtitle": "Programming assistant platform",
+    "title": "Login",
+    "username": "Username",
+    "usernamePlaceholder": "Enter username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "loggingIn": "Logging in...",
+    "login": "Login",
+    "footer": "© {year} WebCode. All rights reserved.",
+    "githubTitle": "Visit GitHub repository",
+    "validation": {
+      "usernameRequired": "Please enter a username",
+      "passwordRequired": "Please enter a password"
+    },
+    "error": {
+      "invalidCredentials": "Invalid username or password",
+      "loginFailed": "Login failed: {message}"
+    }
+  },
   "progressTracker": {
     "stageInit": "Initializing",
     "stageAnalyze": "Analyzing",

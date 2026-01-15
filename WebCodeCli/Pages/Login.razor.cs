@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
@@ -10,6 +11,7 @@ public partial class Login : ComponentBase
     [Inject] private IAuthenticationService AuthenticationService { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] private ILocalizationService L { get; set; } = default!;
 
     private string _username = string.Empty;
     private string _password = string.Empty;
@@ -17,8 +19,23 @@ public partial class Login : ComponentBase
     private bool _isLoading = false;
     private bool _showPassword = false;
 
+    // 本地化相关
+    private Dictionary<string, string> _translations = new();
+    private string _currentLanguage = "zh-CN";
+
     protected override async Task OnInitializedAsync()
     {
+        // 初始化本地化
+        try
+        {
+            _currentLanguage = await L.GetCurrentLanguageAsync();
+            await LoadTranslationsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[登录] 初始化本地化失败: {ex.Message}");
+        }
+
         // 如果认证未启用，直接跳转到主页
         if (!AuthenticationService.IsAuthenticationEnabled())
         {
@@ -41,13 +58,13 @@ public partial class Login : ComponentBase
         // 验证输入
         if (string.IsNullOrWhiteSpace(_username))
         {
-            _errorMessage = "请输入用户名";
+            _errorMessage = T("login.validation.usernameRequired");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(_password))
         {
-            _errorMessage = "请输入密码";
+            _errorMessage = T("login.validation.passwordRequired");
             return;
         }
 
@@ -72,13 +89,13 @@ public partial class Login : ComponentBase
             }
             else
             {
-                _errorMessage = "用户名或密码错误";
+                _errorMessage = T("login.error.invalidCredentials");
                 _password = string.Empty; // 清空密码
             }
         }
         catch (Exception ex)
         {
-            _errorMessage = $"登录失败: {ex.Message}";
+            _errorMessage = T("login.error.loginFailed", ("message", ex.Message));
             Console.WriteLine($"登录异常: {ex}");
         }
         finally
@@ -126,5 +143,85 @@ public partial class Login : ComponentBase
             return false;
         }
     }
+
+    #region 本地化辅助方法
+
+    private async Task LoadTranslationsAsync()
+    {
+        try
+        {
+            var allTranslations = await L.GetAllTranslationsAsync(_currentLanguage);
+            _translations = FlattenTranslations(allTranslations);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[登录] 加载翻译资源失败: {ex.Message}");
+        }
+    }
+
+    private Dictionary<string, string> FlattenTranslations(Dictionary<string, object> source, string prefix = "")
+    {
+        var result = new Dictionary<string, string>();
+
+        foreach (var kvp in source)
+        {
+            var key = string.IsNullOrEmpty(prefix) ? kvp.Key : $"{prefix}.{kvp.Key}";
+
+            if (kvp.Value is JsonElement jsonElement)
+            {
+                if (jsonElement.ValueKind == JsonValueKind.Object)
+                {
+                    var nested = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonElement.GetRawText());
+                    if (nested != null)
+                    {
+                        foreach (var item in FlattenTranslations(nested, key))
+                        {
+                            result[item.Key] = item.Value;
+                        }
+                    }
+                }
+                else if (jsonElement.ValueKind == JsonValueKind.String)
+                {
+                    result[key] = jsonElement.GetString() ?? key;
+                }
+            }
+            else if (kvp.Value is Dictionary<string, object> dict)
+            {
+                foreach (var item in FlattenTranslations(dict, key))
+                {
+                    result[item.Key] = item.Value;
+                }
+            }
+            else if (kvp.Value is string str)
+            {
+                result[key] = str;
+            }
+        }
+
+        return result;
+    }
+
+    private string T(string key)
+    {
+        if (_translations.TryGetValue(key, out var translation))
+        {
+            return translation;
+        }
+
+        var parts = key.Split('.');
+        return parts.Length > 0 ? parts[^1] : key;
+    }
+
+    private string T(string key, params (string name, string value)[] parameters)
+    {
+        var text = T(key);
+        foreach (var (name, value) in parameters)
+        {
+            text = text.Replace($"{{{name}}}", value);
+        }
+        return text;
+    }
+
+    #endregion
 }
 

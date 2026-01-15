@@ -259,6 +259,29 @@
       "removeDuplicatesDesc": "重複したコード片やファイル参照を削除"
     }
   },
+  "login": {
+    "pageTitle": "ログイン - WebCode",
+    "subtitle": "プログラミングアシスタントプラットフォーム",
+    "title": "ログイン",
+    "username": "ユーザー名",
+    "usernamePlaceholder": "ユーザー名を入力",
+    "password": "パスワード",
+    "passwordPlaceholder": "パスワードを入力",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを隠す",
+    "loggingIn": "ログイン中...",
+    "login": "ログイン",
+    "footer": "© {year} WebCode. All rights reserved.",
+    "githubTitle": "GitHub リポジトリを開く",
+    "validation": {
+      "usernameRequired": "ユーザー名を入力してください",
+      "passwordRequired": "パスワードを入力してください"
+    },
+    "error": {
+      "invalidCredentials": "ユーザー名またはパスワードが正しくありません",
+      "loginFailed": "ログイン失敗: {message}"
+    }
+  },
   "progressTracker": {
     "stageInit": "初期化",
     "stageAnalyze": "分析中",
