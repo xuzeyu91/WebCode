@@ -125,6 +125,10 @@
       "raw": "输出",
       "event": "事件 ({type})"
     },
+    "content": {
+      "turnCompleted": "本轮交互已完成。",
+      "turnCompletedWithUsage": "本轮交互已完成，详见下方 token 统计。"
+    },
     "badge": {
       "unknown": "未识别",
       "todo": "待办",

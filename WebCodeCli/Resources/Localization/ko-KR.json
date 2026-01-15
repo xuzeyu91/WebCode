@@ -131,6 +131,10 @@
       "raw": "출력",
       "event": "이벤트 ({type})"
     },
+    "content": {
+      "turnCompleted": "이번 턴이 완료되었습니다.",
+      "turnCompletedWithUsage": "이번 턴이 완료되었습니다. 아래 토큰 통계를 확인하세요."
+    },
     "badge": {
       "unknown": "미인식",
       "todo": "할 일",

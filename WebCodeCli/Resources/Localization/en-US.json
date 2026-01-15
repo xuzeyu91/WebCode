@@ -125,6 +125,10 @@
       "raw": "Output",
       "event": "Event ({type})"
     },
+    "content": {
+      "turnCompleted": "This turn has completed.",
+      "turnCompletedWithUsage": "This turn has completed. See token usage below."
+    },
     "badge": {
       "unknown": "Unknown",
       "todo": "Todo",

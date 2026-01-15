@@ -306,8 +306,8 @@ public class CodexAdapter : ICliToolAdapter
             };
         }
 
-        outputEvent.Title = "交互已完成";
-        outputEvent.Content = outputEvent.Usage is null ? "本轮交互已完成。" : "本轮交互已完成，详见下方 token 统计。";
+        outputEvent.Title = null;
+        outputEvent.Content = null;
     }
 
     private void ParseTurnFailed(JsonElement root, CliOutputEvent outputEvent)

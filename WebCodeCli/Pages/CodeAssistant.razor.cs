@@ -497,7 +497,7 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
             {
                 Type = outputEvent.EventType,
                 Title = adapter.GetEventTitle(outputEvent),
-                Content = outputEvent.Content ?? string.Empty,
+                Content = GetEventDisplayContent(outputEvent, outputEvent.Content),
                 ItemType = outputEvent.ItemType,
                 IsUnknown = outputEvent.IsUnknown
             };
@@ -684,8 +684,10 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
         _jsonlEvents.Add(new JsonlDisplayItem
         {
             Type = "turn.completed",
-            Title = "交互已完成",
-            Content = usage is null ? "本轮交互已完成。" : "本轮交互已完成，详见下方 token 统计。",
+            Title = T("cliEvent.title.turnCompleted"),
+            Content = usage is null
+                ? T("cliEvent.content.turnCompleted")
+                : T("cliEvent.content.turnCompletedWithUsage"),
             Usage = usage
         });
     }
@@ -1553,6 +1555,18 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
             "raw" => T("cliEvent.title.raw"),
             _ => string.IsNullOrWhiteSpace(item.Title) ? T("cliEvent.title.event", ("type", item.Type)) : item.Title
         };
+    }
+
+    private string GetEventDisplayContent(CliOutputEvent outputEvent, string? fallbackContent)
+    {
+        if (string.Equals(outputEvent.EventType, "turn.completed", StringComparison.OrdinalIgnoreCase))
+        {
+            return outputEvent.Usage is null
+                ? T("cliEvent.content.turnCompleted")
+                : T("cliEvent.content.turnCompletedWithUsage");
+        }
+
+        return fallbackContent ?? string.Empty;
     }
 
     private string GetItemTypeLabel(string? itemType)

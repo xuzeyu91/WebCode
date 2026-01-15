@@ -131,6 +131,10 @@
       "raw": "出力",
       "event": "イベント（{type}）"
     },
+    "content": {
+      "turnCompleted": "このターンは完了しました。",
+      "turnCompletedWithUsage": "このターンは完了しました。下のトークン統計をご確認ください。"
+    },
     "badge": {
       "unknown": "未識別",
       "todo": "TODO",
