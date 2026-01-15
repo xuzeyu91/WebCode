@@ -98,6 +98,9 @@ NEW_API_KEY=your_codex_api_key_here
 # 构建镜像（首次需要较长时间）
 docker compose build 
 
+# 无缓存构建（强制重新构建所有层，适用于依赖更新或缓存问题）
+docker compose build --no-cache
+
 # 启动服务（后台运行）
 docker compose up -d
 
