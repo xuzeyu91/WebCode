@@ -2991,10 +2991,10 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
         await HandleLogout();
     }
     
-    private void OnLanguageChangedFromDropdown(string languageCode)
+    private async Task OnLanguageChangedFromDropdown(string languageCode)
     {
         _showUserDropdown = false;
-        OnLanguageChanged(languageCode);
+        await OnLanguageChanged(languageCode);
     }
 
     private void TogglePreviewPanel()
@@ -5035,23 +5035,19 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
     /// <summary>
     /// 处理语言切换事件
     /// </summary>
-    private void OnLanguageChanged(string languageCode)
+    private async Task OnLanguageChanged(string languageCode)
     {
-        // 页面会刷新，但这里兜底强制刷新翻译缓存
         _currentLanguage = languageCode;
-        _ = Task.Run(async () =>
+        try
         {
-            try
-            {
-                await L.ReloadTranslationsAsync();
-                await LoadTranslationsAsync();
-                await InvokeAsync(StateHasChanged);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"语言切换后刷新翻译失败: {ex.Message}");
-            }
-        });
+            await L.ReloadTranslationsAsync();
+            await LoadTranslationsAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"语言切换后刷新翻译失败: {ex.Message}");
+        }
     }
 
     #region 本地化辅助方法

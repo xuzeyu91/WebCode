@@ -120,14 +120,15 @@
             // 关闭下拉菜单
             _isOpen = false;
             
-            // 通知父组件语言已更改
+            // 重新加载翻译缓存，避免旧资源残留
+            await LocalizationService.ReloadTranslationsAsync();
+
+            // 通知父组件语言已更改（刷新本地缓存+UI）
             await OnLanguageChanged.InvokeAsync(languageCode);
-            
-            // 稍微延迟后刷新页面，确保设置已保存
-            await Task.Delay(100);
-            
-            // 使用 JS 刷新页面以应用新语言
-            await JSRuntime.InvokeVoidAsync("eval", "window.location.reload()");
+
+            _isChangingLanguage = false;
+            _targetLanguage = "";
+            StateHasChanged();
         }
         catch (Exception ex)
         {
