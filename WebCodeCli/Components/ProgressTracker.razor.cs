@@ -363,10 +363,10 @@ public partial class ProgressTracker : ComponentBase, IDisposable
     {
         return stage.Status switch
         {
-            StageStatus.Completed => "bg-gradient-to-br from-green-500 to-green-600",
-            StageStatus.Active => "bg-gradient-to-br from-blue-500 to-blue-600 animate-pulse",
-            StageStatus.Failed => "bg-gradient-to-br from-red-500 to-red-600",
-            _ => "bg-gray-200"
+            StageStatus.Completed => "bg-green-600",
+            StageStatus.Active => "bg-gray-700 animate-pulse",
+            StageStatus.Failed => "bg-red-600",
+            _ => "bg-gray-100"
         };
     }
 
@@ -374,17 +374,17 @@ public partial class ProgressTracker : ComponentBase, IDisposable
     {
         return stage.Status switch
         {
-            StageStatus.Completed => "text-green-600",
-            StageStatus.Active => "text-blue-600",
-            StageStatus.Failed => "text-red-600",
-            _ => "text-gray-500"
+            StageStatus.Completed => "text-green-700",
+            StageStatus.Active => "text-gray-700",
+            StageStatus.Failed => "text-red-700",
+            _ => "text-gray-400"
         };
     }
 
     private string GetConnectorClass(ProgressStage stage)
     {
         return stage.Status == StageStatus.Completed 
-            ? "bg-gradient-to-r from-green-500 to-green-600" 
+            ? "bg-green-600" 
             : "bg-gray-200";
     }
 
@@ -392,30 +392,30 @@ public partial class ProgressTracker : ComponentBase, IDisposable
     {
         if (_isFailed)
         {
-            return "bg-gradient-to-r from-red-500 to-red-600";
+            return "bg-red-600";
         }
         
         if (_isCompleted)
         {
-            return "bg-gradient-to-r from-green-500 to-green-600";
+            return "bg-green-600";
         }
 
-        return "bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600";
+        return "bg-gray-700";
     }
 
     private string GetCurrentStageTextClass()
     {
         if (_isFailed)
         {
-            return "text-red-600";
+            return "text-red-700";
         }
         
         if (_isCompleted)
         {
-            return "text-green-600";
+            return "text-green-700";
         }
 
-        return "text-blue-600";
+        return "text-gray-700";
     }
 
     public void Dispose()
