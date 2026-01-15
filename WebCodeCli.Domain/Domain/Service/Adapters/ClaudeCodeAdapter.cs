@@ -298,21 +298,21 @@ public class ClaudeCodeAdapter : ICliToolAdapter
         outputEvent.Title = "消息";
         outputEvent.ItemType = "agent_message";
 
-        // 提取会话ID
+        // Extract session ID
         if (root.TryGetProperty("session_id", out var sessionIdElement))
         {
             outputEvent.SessionId = sessionIdElement.GetString();
         }
 
-        // 检查是否有 role 字段在顶层（表示这是一个类似 assistant/user 的消息结构）
+        // Check if there is a role field at the top level (indicating this is an assistant/user message structure)
         var role = GetStringProperty(root, "role");
         var isAssistant = !string.IsNullOrEmpty(role) && 
                           role.Equals("assistant", StringComparison.OrdinalIgnoreCase);
 
-        // 如果 content 是数组，按 assistant/user 事件的方式处理
+        // If content is an array, handle it like assistant/user events
         if (root.TryGetProperty("content", out var contentProp) && contentProp.ValueKind == JsonValueKind.Array)
         {
-            // 1) 优先识别 tool_use/tool_result
+            // 1) Prioritize identifying tool_use/tool_result
             foreach (var item in contentProp.EnumerateArray())
             {
                 if (item.ValueKind != JsonValueKind.Object) continue;
@@ -333,7 +333,7 @@ public class ClaudeCodeAdapter : ICliToolAdapter
                 }
             }
 
-            // 2) 提取文本内容（包括 text 和 thinking 类型）
+            // 2) Extract text content (including text and thinking types)
             var text = ExtractTextFromContentArray(contentProp);
             if (!string.IsNullOrWhiteSpace(text))
             {
@@ -344,13 +344,13 @@ public class ClaudeCodeAdapter : ICliToolAdapter
                 return;
             }
 
-            // 3) 兜底：数组中没有可识别内容
+            // 3) Fallback: no recognizable content in array
             outputEvent.Content = "消息（无可显示内容）";
             outputEvent.IsUnknown = false;
             return;
         }
 
-        // 原有逻辑：提取字符串类型的消息内容
+        // Original logic: extract string type message content
         var content = GetStringProperty(root, "content") ??
                       GetStringProperty(root, "text") ??
                       GetStringProperty(root, "message");
@@ -613,7 +613,7 @@ public class ClaudeCodeAdapter : ICliToolAdapter
             if (item.ValueKind != JsonValueKind.Object) continue;
             var itemType = GetStringProperty(item, "type") ?? string.Empty;
             
-            // 处理 type="text" 的内容
+            // Handle type="text" content
             if (string.Equals(itemType, "text", StringComparison.OrdinalIgnoreCase))
             {
                 var text = GetStringProperty(item, "text");
@@ -624,13 +624,13 @@ public class ClaudeCodeAdapter : ICliToolAdapter
                 continue;
             }
             
-            // 处理 type="thinking" 的内容
+            // Handle type="thinking" content
             if (string.Equals(itemType, "thinking", StringComparison.OrdinalIgnoreCase))
             {
                 var thinking = GetStringProperty(item, "thinking");
                 if (!string.IsNullOrEmpty(thinking))
                 {
-                    // 添加思考内容，可以选择性地添加标识
+                    // Add thinking content, optionally with identifier
                     if (sb.Length > 0)
                     {
                         sb.AppendLine();
