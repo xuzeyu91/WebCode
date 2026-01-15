@@ -80,7 +80,7 @@ RUN npm install -g @anthropic-ai/claude-code --registry=https://registry.npmmirr
 # 安装 Codex CLI
 # ============================================
 # 方式1: 使用 npm 安装（推荐）
-RUN npm install -g @openai/codex@0.81.0 --registry=https://registry.npmmirror.com
+RUN npm install -g @openai/codex@0.80.0 --registry=https://registry.npmmirror.com
 
 # 创建 Codex 配置目录
 RUN mkdir -p /root/.codex
