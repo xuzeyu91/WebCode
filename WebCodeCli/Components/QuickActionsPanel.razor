@@ -72,7 +72,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
-                    管理快捷操作
+                    @T("quickActions.manage")
                 </h3>
                 <button @onclick="CloseCustomizeModal" class="p-2 hover:bg-gray-200 rounded-lg transition-colors">
                     <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,7 +88,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        添加自定义操作
+                        @T("quickActions.addCustom")
                     </button>
                 </div>
 
@@ -110,12 +110,12 @@
                             <div class="flex items-center gap-1 flex-shrink-0">
                                 @if (action.IsCustom)
                                 {
-                                    <button @onclick="() => ShowEditDialog(action)" class="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="编辑">
+                                    <button @onclick="() => ShowEditDialog(action)" class="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="@T("common.edit")">
                                         <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </button>
-                                    <button @onclick="() => DeleteAction(action)" class="p-2 hover:bg-red-100 rounded-lg transition-colors" title="删除">
+                                    <button @onclick="() => DeleteAction(action)" class="p-2 hover:bg-red-100 rounded-lg transition-colors" title="@T("common.delete")">
                                         <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                         </svg>
@@ -130,7 +130,7 @@
             <!-- 底部 -->
             <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
                 <button @onclick="CloseCustomizeModal" class="btn-default">
-                    关闭
+                    @T("common.close")
                 </button>
             </div>
         </div>
@@ -144,7 +144,7 @@
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all" @onclick:stopPropagation="true">
             <div class="flex items-center justify-between p-6 border-b-2 border-gray-200 bg-gray-50">
                 <h3 class="text-xl font-bold text-gray-800">
-                    @(_editingAction == null ? "添加快捷操作" : "编辑快捷操作")
+                    @(_editingAction == null ? T("quickActions.addAction") : T("quickActions.editAction"))
                 </h3>
                 <button @onclick="CloseActionDialog" class="p-2 hover:bg-gray-200 rounded-lg transition-colors">
                     <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,34 +155,34 @@
 
             <div class="p-6 space-y-4">
                 <div>
-                    <label class="label">标题 *</label>
-                    <input @bind="_actionForm.Title" type="text" class="input-field" placeholder="例如: 优化代码" maxlength="50" />
+                    <label class="label">@T("quickActions.actionTitle") *</label>
+                    <input @bind="_actionForm.Title" type="text" class="input-field" placeholder="@T("quickActions.actionTitlePlaceholder")" maxlength="50" />
                 </div>
 
                 <div>
-                    <label class="label">内容 *</label>
-                    <textarea @bind="_actionForm.Content" rows="4" class="input-field" placeholder="输入要插入的文本..." maxlength="500"></textarea>
+                    <label class="label">@T("quickActions.actionContent") *</label>
+                    <textarea @bind="_actionForm.Content" rows="4" class="input-field" placeholder="@T("quickActions.actionContentPlaceholder")" maxlength="500"></textarea>
                 </div>
 
                 <div>
-                    <label class="label">图标 (Emoji)</label>
+                    <label class="label">@T("quickActions.actionIcon")</label>
                     <input @bind="_actionForm.Icon" type="text" class="input-field" placeholder="🔧" maxlength="10" />
                 </div>
 
                 <div>
-                    <label class="label">快捷键（可选）</label>
-                    <input @bind="_actionForm.Hotkey" type="text" class="input-field" placeholder="例如: Ctrl+1" maxlength="20" />
+                    <label class="label">@T("quickActions.actionHotkey")</label>
+                    <input @bind="_actionForm.Hotkey" type="text" class="input-field" placeholder="@T("quickActions.actionHotkeyPlaceholder")" maxlength="20" />
                 </div>
             </div>
 
             <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
                 <button @onclick="CloseActionDialog" class="btn-default">
-                    取消
+                    @T("common.cancel")
                 </button>
                 <button @onclick="SaveAction" 
                         disabled="@(string.IsNullOrWhiteSpace(_actionForm.Title) || string.IsNullOrWhiteSpace(_actionForm.Content))"
                         class="btn-primary">
-                    保存
+                    @T("common.save")
                 </button>
             </div>
         </div>

@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System.Text.Json;
 using WebCodeCli.Domain.Domain.Model;
+using WebCodeCli.Domain.Domain.Service;
 
 namespace WebCodeCli.Components;
 
 public partial class QuickActionsPanel : ComponentBase
 {
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] private ILocalizationService L { get; set; } = default!;
 
     [Parameter] public EventCallback<string> OnActionSelected { get; set; }
 
@@ -18,9 +20,13 @@ public partial class QuickActionsPanel : ComponentBase
     private QuickAction? _editingAction = null;
     private ActionFormModel _actionForm = new();
     private bool _isCollapsed = true; // 默认折叠状态
+    
+    // 本地化相关
+    private Dictionary<string, string> _translations = new();
+    private string _currentLanguage = "zh-CN";
 
-    private const string LocalizedTitle = "快捷操作";
-    private const string LocalizedCustomize = "自定义";
+    private string LocalizedTitle => T("quickActions.title");
+    private string LocalizedCustomize => T("quickActions.customize");
     private const string StorageKey = "webcli_quick_actions";
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -29,6 +35,7 @@ public partial class QuickActionsPanel : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadTranslationsAsync();
         await LoadActionsAsync();
     }
 
@@ -373,5 +380,86 @@ public partial class QuickActionsPanel : ComponentBase
         public string Icon { get; set; } = string.Empty;
         public string Hotkey { get; set; } = string.Empty;
     }
+
+    #region 本地化辅助方法
+
+    /// <summary>
+    /// 加载翻译资源
+    /// </summary>
+    private async Task LoadTranslationsAsync()
+    {
+        try
+        {
+            _currentLanguage = await L.GetCurrentLanguageAsync();
+            var allTranslations = await L.GetAllTranslationsAsync(_currentLanguage);
+            _translations = FlattenTranslations(allTranslations);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[快捷操作] 加载翻译资源失败: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 将嵌套的翻译字典展平为点分隔的键
+    /// </summary>
+    private Dictionary<string, string> FlattenTranslations(Dictionary<string, object> source, string prefix = "")
+    {
+        var result = new Dictionary<string, string>();
+        
+        foreach (var kvp in source)
+        {
+            var key = string.IsNullOrEmpty(prefix) ? kvp.Key : $"{prefix}.{kvp.Key}";
+            
+            if (kvp.Value is JsonElement jsonElement)
+            {
+                if (jsonElement.ValueKind == JsonValueKind.Object)
+                {
+                    var nested = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonElement.GetRawText());
+                    if (nested != null)
+                    {
+                        foreach (var item in FlattenTranslations(nested, key))
+                        {
+                            result[item.Key] = item.Value;
+                        }
+                    }
+                }
+                else if (jsonElement.ValueKind == JsonValueKind.String)
+                {
+                    result[key] = jsonElement.GetString() ?? key;
+                }
+            }
+            else if (kvp.Value is Dictionary<string, object> dict)
+            {
+                foreach (var item in FlattenTranslations(dict, key))
+                {
+                    result[item.Key] = item.Value;
+                }
+            }
+            else if (kvp.Value is string str)
+            {
+                result[key] = str;
+            }
+        }
+        
+        return result;
+    }
+
+    /// <summary>
+    /// 获取翻译文本
+    /// </summary>
+    private string T(string key)
+    {
+        if (_translations.TryGetValue(key, out var translation))
+        {
+            return translation;
+        }
+        
+        // 返回键的最后一部分作为默认值
+        var parts = key.Split('.');
+        return parts.Length > 0 ? parts[^1] : key;
+    }
+
+    #endregion
 }
 
