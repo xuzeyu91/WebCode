@@ -71,6 +71,9 @@ opencode auth logout
 
 ## 基本使用
 
+### 查看模型
+https://models.dev/?search=GLM-4.7
+
 ### 启动 TUI（交互模式）
 
 ```bash

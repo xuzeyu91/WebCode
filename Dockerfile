@@ -88,6 +88,11 @@ RUN npm install -g @anthropic-ai/claude-code --registry=https://registry.npmmirr
 # ============================================
 RUN npm install -g @openai/codex@0.80.0 --registry=https://registry.npmmirror.com
 
+# ============================================
+# 安装 OpenCode CLI
+# ============================================
+RUN npm install -g opencode-ai --registry=https://registry.npmmirror.com
+
 # 创建 Codex 配置目录
 RUN mkdir -p /root/.codex
 
@@ -99,6 +104,7 @@ COPY docker/codex-config.toml /root/.codex/config.toml
 # ============================================
 RUN claude --version || echo "Claude CLI installed" \
     && codex --version || echo "Codex CLI installed" \
+    && opencode --version || echo "OpenCode CLI installed" \
     && node --version \
     && python3 --version \
     && git --version
