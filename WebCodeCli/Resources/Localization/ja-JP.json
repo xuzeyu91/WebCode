@@ -328,7 +328,18 @@
     "versionHistory": "バージョン履歴",
     "fileDiff": "ファイル比較",
     "fileMonitor": "リアルタイム監視",
-    "fileSearch": "ファイル検索"
+    "fileSearch": "ファイル検索",
+    "multiSelect": "複数選択",
+    "batchDelete": "一括削除",
+    "deselectAll": "すべての選択を解除",
+    "batchDeleteConfirm": "一括削除の確認",
+    "batchDeleteMessage": "選択した {count} 個のセッションを削除してもよろしいですか？",
+    "messagesCount": "件のメッセージ",
+    "currentSession": "現在",
+    "includesCurrentSession": "現在アクティブなセッションが含まれています",
+    "currentSessionDeleteNote": "削除後、他のセッションに切り替えるか、新しいセッションが作成されます。",
+    "batchDeleteWarning": "警告：この操作は選択したすべてのセッションとメッセージを完全に削除し、元に戻すことはできません！",
+    "confirmBatchDelete": "削除を確認 ({count})"
   },
   "envConfig": {
     "title": "環境変数を設定",

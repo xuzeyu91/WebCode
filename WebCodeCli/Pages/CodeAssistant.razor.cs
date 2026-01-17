@@ -202,6 +202,13 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
     private bool _isLoadingSessions = false;
     private bool _isLoadingSession = false;
     
+    // 会话多选批量删除
+    private bool _isSessionMultiSelectMode = false;
+    private HashSet<string> _selectedSessionIds = new();
+    private bool _showBatchSessionDeleteDialog = false;
+    private bool _isDeletingBatchSessions = false;
+    private string _batchSessionDeleteError = string.Empty;
+    
     // 批量操作
     private HashSet<string> _selectedFiles = new();
     
@@ -3890,6 +3897,189 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
             StateHasChanged();
         }
     }
+    
+    #region 会话多选批量删除
+    
+    /// <summary>
+    /// 切换多选模式
+    /// </summary>
+    private void ToggleSessionMultiSelectMode()
+    {
+        _isSessionMultiSelectMode = !_isSessionMultiSelectMode;
+        if (!_isSessionMultiSelectMode)
+        {
+            // 退出多选模式时清空选择
+            _selectedSessionIds.Clear();
+        }
+        StateHasChanged();
+    }
+    
+    /// <summary>
+    /// 切换单个会话的选择状态
+    /// </summary>
+    private void ToggleSessionSelection(string sessionId)
+    {
+        if (_selectedSessionIds.Contains(sessionId))
+        {
+            _selectedSessionIds.Remove(sessionId);
+        }
+        else
+        {
+            _selectedSessionIds.Add(sessionId);
+        }
+        StateHasChanged();
+    }
+    
+    /// <summary>
+    /// 全选/取消全选会话
+    /// </summary>
+    private void ToggleSelectAllSessions()
+    {
+        if (_selectedSessionIds.Count == _sessions.Count)
+        {
+            // 全部已选中，则取消全选
+            _selectedSessionIds.Clear();
+        }
+        else
+        {
+            // 全选
+            _selectedSessionIds = _sessions.Select(s => s.SessionId).ToHashSet();
+        }
+        StateHasChanged();
+    }
+    
+    /// <summary>
+    /// 显示批量删除确认对话框
+    /// </summary>
+    private void ShowBatchSessionDeleteDialog()
+    {
+        if (_selectedSessionIds.Count == 0)
+        {
+            return;
+        }
+        _showBatchSessionDeleteDialog = true;
+        _batchSessionDeleteError = string.Empty;
+        StateHasChanged();
+    }
+    
+    /// <summary>
+    /// 关闭批量删除确认对话框
+    /// </summary>
+    private void CloseBatchSessionDeleteDialog()
+    {
+        _showBatchSessionDeleteDialog = false;
+        _batchSessionDeleteError = string.Empty;
+        _isDeletingBatchSessions = false;
+        StateHasChanged();
+    }
+    
+    /// <summary>
+    /// 批量删除选中的会话
+    /// </summary>
+    private async Task DeleteSelectedSessions()
+    {
+        if (_selectedSessionIds.Count == 0 || _isDeletingBatchSessions)
+        {
+            return;
+        }
+
+        try
+        {
+            _isDeletingBatchSessions = true;
+            _batchSessionDeleteError = string.Empty;
+            StateHasChanged();
+
+            var sessionIdsToDelete = _selectedSessionIds.ToList();
+            var deletedCurrentSession = _currentSession != null && sessionIdsToDelete.Contains(_currentSession.SessionId);
+            var deletedCount = 0;
+
+            foreach (var sessionId in sessionIdsToDelete)
+            {
+                try
+                {
+                    // 调用 SessionHistoryManager 删除会话数据
+                    await SessionHistoryManager.DeleteSessionAsync(sessionId);
+
+                    // 删除输出结果区域持久化数据
+                    await DeleteOutputStateAsync(sessionId);
+                    
+                    // 清理工作区目录
+                    try
+                    {
+                        // 先停止该会话可能启动的开发服务器
+                        try
+                        {
+                            await DevServerManager.StopAllSessionServersAsync(sessionId);
+                        }
+                        catch (Exception stopServerEx)
+                        {
+                            Console.WriteLine($"⚠️ 停止开发服务器失败: {stopServerEx.Message}");
+                        }
+
+                        CliExecutorService.CleanupSessionWorkspace(sessionId);
+                        Console.WriteLine($"✓ 已清理工作区: {sessionId}");
+                    }
+                    catch (Exception cleanupEx)
+                    {
+                        Console.WriteLine($"⚠️ 清理工作区失败: {cleanupEx.Message}");
+                    }
+                    
+                    deletedCount++;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"删除会话失败 {sessionId}: {ex.Message}");
+                }
+            }
+            
+            Console.WriteLine($"✓ 批量删除完成: 成功删除 {deletedCount}/{sessionIdsToDelete.Count} 个会话");
+
+            // 清空选择并退出多选模式
+            _selectedSessionIds.Clear();
+            _isSessionMultiSelectMode = false;
+
+            // 重新加载会话列表
+            await LoadSessionsAsync();
+
+            if (deletedCurrentSession)
+            {
+                if (_sessions.Any())
+                {
+                    var nextSessionId = _sessions.First().SessionId;
+                    Console.WriteLine($"删除当前会话后，自动恢复最近会话: {nextSessionId}");
+                    await LoadSession(nextSessionId);
+                }
+                else
+                {
+                    Console.WriteLine("删除后没有剩余会话，自动创建空白会话");
+                    await CreateNewSessionAsync();
+                }
+            }
+
+            // 关闭对话框
+            CloseBatchSessionDeleteDialog();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"批量删除会话失败: {ex.Message}");
+            _batchSessionDeleteError = $"删除失败: {ex.Message}";
+        }
+        finally
+        {
+            _isDeletingBatchSessions = false;
+            StateHasChanged();
+        }
+    }
+    
+    /// <summary>
+    /// 获取选中的会话列表
+    /// </summary>
+    private List<SessionHistory> GetSelectedSessions()
+    {
+        return _sessions.Where(s => _selectedSessionIds.Contains(s.SessionId)).ToList();
+    }
+    
+    #endregion
     
     /// <summary>
     /// 显示重命名对话框

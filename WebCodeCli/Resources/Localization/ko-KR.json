@@ -328,7 +328,18 @@
     "versionHistory": "버전 기록",
     "fileDiff": "파일 비교",
     "fileMonitor": "실시간 모니터링",
-    "fileSearch": "파일 검색"
+    "fileSearch": "파일 검색",
+    "multiSelect": "다중 선택",
+    "batchDelete": "일괄 삭제",
+    "deselectAll": "선택 해제",
+    "batchDeleteConfirm": "일괄 삭제 확인",
+    "batchDeleteMessage": "선택한 {count}개의 세션을 삭제하시겠습니까?",
+    "messagesCount": "개 메시지",
+    "currentSession": "현재",
+    "includesCurrentSession": "현재 활성 세션이 포함되어 있습니다",
+    "currentSessionDeleteNote": "삭제 후 다른 세션으로 전환되거나 새 세션이 생성됩니다.",
+    "batchDeleteWarning": "경고: 이 작업은 선택한 모든 세션과 메시지를 영구적으로 삭제하며, 되돌릴 수 없습니다!",
+    "confirmBatchDelete": "삭제 확인 ({count})"
   },
   "envConfig": {
     "title": "환경 변수 설정",

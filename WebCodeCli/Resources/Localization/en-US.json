@@ -273,7 +273,18 @@
     "versionHistory": "Version History",
     "fileDiff": "File Diff",
     "fileMonitor": "File Monitor",
-    "fileSearch": "File Search"
+    "fileSearch": "File Search",
+    "multiSelect": "Multi-select",
+    "batchDelete": "Batch Delete",
+    "deselectAll": "Deselect All",
+    "batchDeleteConfirm": "Confirm Batch Delete",
+    "batchDeleteMessage": "Are you sure you want to delete the selected {count} sessions?",
+    "messagesCount": "messages",
+    "currentSession": "Current",
+    "includesCurrentSession": "Includes the current active session",
+    "currentSessionDeleteNote": "A new session will be created or switched to after deletion.",
+    "batchDeleteWarning": "Warning: This action will permanently delete all selected sessions and their messages, and cannot be undone!",
+    "confirmBatchDelete": "Delete ({count})"
   },
   "envConfig": {
     "title": "Environment Variables",

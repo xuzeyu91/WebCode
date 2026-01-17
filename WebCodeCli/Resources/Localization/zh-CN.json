@@ -273,7 +273,18 @@
     "versionHistory": "版本历史",
     "fileDiff": "文件对比",
     "fileMonitor": "实时监控",
-    "fileSearch": "文件搜索"
+    "fileSearch": "文件搜索",
+    "multiSelect": "多选",
+    "batchDelete": "批量删除",
+    "deselectAll": "取消全选",
+    "batchDeleteConfirm": "确认批量删除",
+    "batchDeleteMessage": "您确定要删除选中的 {count} 个会话吗？",
+    "messagesCount": "条消息",
+    "currentSession": "当前会话",
+    "includesCurrentSession": "包含当前激活的会话",
+    "currentSessionDeleteNote": "删除后将自动切换到其他会话或创建新会话。",
+    "batchDeleteWarning": "警告：此操作将永久删除所有选中的会话及其消息，且无法恢复！",
+    "confirmBatchDelete": "确认删除 ({count})"
   },
   "envConfig": {
     "title": "配置环境变量",

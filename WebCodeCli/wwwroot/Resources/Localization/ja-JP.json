@@ -2,6 +2,55 @@
   "common": {
     "save": "保存",
     "cancel": "キャンセル",
+  "contextPreview": {
+    "title": "コンテキストプレビュー",
+    "tokenUsage": "トークン使用",
+    "usageRate": "使用率",
+    "items": "コンテキスト項目",
+    "included": "{count} 件含まれています",
+    "remaining": "残り",
+    "tokens": "tokens",
+    "searchPlaceholder": "コンテキストを検索...",
+    "filterAll": "すべての種類",
+    "type": {
+      "userMessage": "ユーザーメッセージ",
+      "assistantMessage": "アシスタントメッセージ",
+      "codeSnippet": "コード片",
+      "fileReference": "ファイル参照",
+      "workspaceFile": "ワークスペースファイル",
+      "errorMessage": "エラーメッセージ",
+      "user": "ユーザー",
+      "assistant": "アシスタント",
+      "code": "コード",
+      "file": "ファイル",
+      "workspace": "ワークスペース",
+      "error": "エラー"
+    },
+    "compressTitle": "コンテキストを圧縮",
+    "tokensCount": "{count} tokens",
+    "priorityUp": "優先度を上げる",
+    "priorityDown": "優先度を下げる",
+    "viewFull": "全文を表示 →",
+    "empty": "コンテキスト項目がありません",
+    "fullContent": "全文",
+    "tags": "タグ:",
+    "tokenCount": "トークン数",
+    "priority": "優先度",
+    "createdAt": "作成時間",
+    "copy": "内容をコピー",
+    "compressing": "圧縮中...",
+    "compressStart": "圧縮を開始",
+    "compress": {
+      "keepRecent": "最新のメッセージを保持",
+      "keepRecentDesc": "最新の会話を保持し、古いメッセージを削除",
+      "keepHighPriority": "高優先度を保持",
+      "keepHighPriorityDesc": "重要な内容を保持し、低優先度項目を削除",
+      "smartSummary": "スマート要約（推奨）",
+      "smartSummaryDesc": "重要情報を保持し、冗長性を智能的に圧縮",
+      "removeDuplicates": "重複を削除",
+      "removeDuplicatesDesc": "重複したコード片やファイル参照を削除"
+    }
+  },
     "delete": "削除",
     "edit": "編集",
     "add": "追加",
@@ -106,6 +155,81 @@
     "currentStage": "現在のステージ",
     "cancel": "キャンセル"
   },
+  "progressTracker": {
+    "stageInit": "初期化",
+    "stageAnalyze": "分析中",
+    "stageExecute": "実行中",
+    "stageComplete": "完了"
+  },
+  "cliEvent": {
+    "title": {
+      "threadStarted": "スレッド開始",
+      "turnStarted": "新しいターン開始",
+      "turnCompleted": "ターン完了",
+      "turnFailed": "ターン失敗",
+      "itemAction": "{item}{action}",
+      "todoListUpdate": "TODOリスト更新",
+      "error": "エラー",
+      "init": "セッション初期化",
+      "message": "メッセージ",
+      "toolUse": "ツール呼び出し",
+      "toolResult": "ツール結果",
+      "result": "実行完了",
+      "system": "システムメッセージ",
+      "user": "ユーザー入力",
+      "raw": "出力",
+      "event": "イベント（{type}）"
+    },
+    "content": {
+        "threadId": "スレッドID: {id}",
+        "threadCreated": "新しい会話スレッドを作成しました。",
+        "turnStarted": "応答待ち...",
+      "turnCompleted": "このターンは完了しました。",
+      "turnCompletedWithUsage": "このターンは完了しました。下のトークン統計をご確認ください。"
+    },
+    "badge": {
+      "unknown": "未識別",
+      "todo": "TODO",
+      "reasoning": "推論",
+      "reply": "返信",
+      "thread": "スレッド",
+      "turnStart": "ターン開始",
+      "turnEnd": "ターン終了",
+      "turnFailed": "ターン失敗",
+      "itemStart": "項目開始",
+      "itemUpdate": "項目更新",
+      "error": "エラー",
+      "init": "初期化",
+      "toolUse": "ツール呼び出し",
+      "toolResult": "ツール結果",
+      "result": "完了",
+      "system": "システム",
+      "input": "入力",
+      "output": "出力",
+      "event": "イベント"
+    },
+    "action": {
+      "start": "開始",
+      "update": "更新",
+      "complete": "完了"
+    },
+    "itemType": {
+      "commandExecution": "コマンド実行",
+      "agentMessage": "アシスタントメッセージ",
+      "reasoning": "推論プロセス",
+      "mcpToolCall": "MCP ツール呼び出し",
+      "webSearch": "Web検索",
+      "todoList": "TODOリスト",
+      "fileChange": "ファイル変更",
+      "toolCall": "ツール呼び出し",
+      "unknown": "不明な種類"
+    },
+    "group": {
+      "commandExecution": "コマンド実行",
+      "toolCall": "ツール呼び出し",
+      "withName": "{group} - {name}"
+    }
+  },
   "codeAssistant": {
     "title": "プログラミングアシスタント",
     "inputPlaceholder": "プログラミングの質問または要件を入力...",
@@ -184,7 +308,6 @@
     "open": "開く",
     "deleting": "削除中...",
     "fileTree": "ファイルツリー",
-    "versionHistory": "バージョン履歴",
     "previewRootPath": "プレビュールート",
     "changePreviewRoot": "変更",
     "resetToWorkspaceRoot": "ワークスペースルートにリセット",
@@ -202,11 +325,21 @@
     "serverRunning": "実行中",
     "port": "ポート",
     "preview": "プレビュー",
+    "versionHistory": "バージョン履歴",
     "fileDiff": "ファイル比較",
     "fileMonitor": "リアルタイム監視",
     "fileSearch": "ファイル検索",
-    "selectFile": "ファイルを選択",
-    "uploadToWorkspace": "ワークスペースにアップロード"
+    "multiSelect": "複数選択",
+    "batchDelete": "一括削除",
+    "deselectAll": "すべての選択を解除",
+    "batchDeleteConfirm": "一括削除の確認",
+    "batchDeleteMessage": "選択した {count} 個のセッションを削除してもよろしいですか？",
+    "messagesCount": "件のメッセージ",
+    "currentSession": "現在",
+    "includesCurrentSession": "現在アクティブなセッションが含まれています",
+    "currentSessionDeleteNote": "削除後、他のセッションに切り替えるか、新しいセッションが作成されます。",
+    "batchDeleteWarning": "警告：この操作は選択したすべてのセッションとメッセージを完全に削除し、元に戻すことはできません！",
+    "confirmBatchDelete": "削除を確認 ({count})"
   },
   "envConfig": {
     "title": "環境変数を設定",
@@ -226,153 +359,6 @@
     "resetButton": "既定に戻す",
     "saving": "保存中...",
     "save": "保存"
-  },
-  "contextPreview": {
-    "title": "コンテキストプレビュー",
-    "tokenUsage": "トークン使用",
-    "usageRate": "使用率",
-    "items": "コンテキスト項目",
-    "included": "{count} 件含まれています",
-    "remaining": "残り",
-    "tokens": "tokens",
-    "searchPlaceholder": "コンテキストを検索...",
-    "filterAll": "すべての種類",
-    "type": {
-      "userMessage": "ユーザーメッセージ",
-      "assistantMessage": "アシスタントメッセージ",
-      "codeSnippet": "コード片",
-      "fileReference": "ファイル参照",
-      "workspaceFile": "ワークスペースファイル",
-      "errorMessage": "エラーメッセージ",
-      "user": "ユーザー",
-      "assistant": "アシスタント",
-      "code": "コード",
-      "file": "ファイル",
-      "workspace": "ワークスペース",
-      "error": "エラー"
-    },
-    "compressTitle": "コンテキストを圧縮",
-    "tokensCount": "{count} tokens",
-    "priorityUp": "優先度を上げる",
-    "priorityDown": "優先度を下げる",
-    "viewFull": "全文を表示 →",
-    "empty": "コンテキスト項目がありません",
-    "fullContent": "全文",
-    "tags": "タグ:",
-    "tokenCount": "トークン数",
-    "priority": "優先度",
-    "createdAt": "作成時間",
-    "copy": "内容をコピー",
-    "compressing": "圧縮中...",
-    "compressStart": "圧縮を開始",
-    "compress": {
-      "keepRecent": "最新のメッセージを保持",
-      "keepRecentDesc": "最新の会話を保持し、古いメッセージを削除",
-      "keepHighPriority": "高優先度を保持",
-      "keepHighPriorityDesc": "重要な内容を保持し、低優先度項目を削除",
-      "smartSummary": "スマート要約（推奨）",
-      "smartSummaryDesc": "重要情報を保持し、冗長性を智能的に圧縮",
-      "removeDuplicates": "重複を削除",
-      "removeDuplicatesDesc": "重複したコード片やファイル参照を削除"
-    }
-  },
-  "login": {
-    "pageTitle": "ログイン - WebCode",
-    "subtitle": "プログラミングアシスタントプラットフォーム",
-    "title": "ログイン",
-    "username": "ユーザー名",
-    "usernamePlaceholder": "ユーザー名を入力",
-    "password": "パスワード",
-    "passwordPlaceholder": "パスワードを入力",
-    "showPassword": "パスワードを表示",
-    "hidePassword": "パスワードを隠す",
-    "loggingIn": "ログイン中...",
-    "login": "ログイン",
-    "footer": "© {year} WebCode. All rights reserved.",
-    "githubTitle": "GitHub リポジトリを開く",
-    "validation": {
-      "usernameRequired": "ユーザー名を入力してください",
-      "passwordRequired": "パスワードを入力してください"
-    },
-    "error": {
-      "invalidCredentials": "ユーザー名またはパスワードが正しくありません",
-      "loginFailed": "ログイン失敗: {message}"
-    }
-  },
-  "progressTracker": {
-    "stageInit": "初期化",
-    "stageAnalyze": "分析中",
-    "stageExecute": "実行中",
-    "stageComplete": "完了"
-  },
-  "cliEvent": {
-    "title": {
-      "threadStarted": "スレッド開始",
-      "turnStarted": "新しいターン開始",
-      "turnCompleted": "ターン完了",
-      "turnFailed": "ターン失敗",
-      "itemAction": "{item}{action}",
-      "todoListUpdate": "TODOリスト更新",
-      "error": "エラー",
-      "init": "セッション初期化",
-      "message": "メッセージ",
-      "toolUse": "ツール呼び出し",
-      "toolResult": "ツール結果",
-      "result": "実行完了",
-      "system": "システムメッセージ",
-      "user": "ユーザー入力",
-      "raw": "出力",
-      "event": "イベント（{type}）"
-    },
-    "content": {
-        "threadId": "スレッドID: {id}",
-        "threadCreated": "新しい会話スレッドを作成しました。",
-        "turnStarted": "応答待ち...",
-      "turnCompleted": "このターンは完了しました。",
-      "turnCompletedWithUsage": "このターンは完了しました。下のトークン統計をご確認ください。"
-    },
-    "badge": {
-      "unknown": "未識別",
-      "todo": "TODO",
-      "reasoning": "推論",
-      "reply": "返信",
-      "thread": "スレッド",
-      "turnStart": "ターン開始",
-      "turnEnd": "ターン終了",
-      "turnFailed": "ターン失敗",
-      "itemStart": "項目開始",
-      "itemUpdate": "項目更新",
-      "error": "エラー",
-      "init": "初期化",
-      "toolUse": "ツール呼び出し",
-      "toolResult": "ツール結果",
-      "result": "完了",
-      "system": "システム",
-      "input": "入力",
-      "output": "出力",
-      "event": "イベント"
-    },
-    "action": {
-      "start": "開始",
-      "update": "更新",
-      "complete": "完了"
-    },
-    "itemType": {
-      "commandExecution": "コマンド実行",
-      "agentMessage": "アシスタントメッセージ",
-      "reasoning": "推論プロセス",
-      "mcpToolCall": "MCP ツール呼び出し",
-      "webSearch": "Web検索",
-      "todoList": "TODOリスト",
-      "fileChange": "ファイル変更",
-      "toolCall": "ツール呼び出し",
-      "unknown": "不明な種類"
-    },
-    "group": {
-      "commandExecution": "コマンド実行",
-      "toolCall": "ツール呼び出し",
-      "withName": "{group} - {name}"
-    }
   },
   "fileSearch": {
     "debugLabel": "デバッグ",
@@ -467,6 +453,29 @@
     "changeModified": "変更",
     "changeDeleted": "削除",
     "changeRenamed": "名前変更"
+  },
+  "login": {
+    "pageTitle": "ログイン - WebCode",
+    "subtitle": "プログラミングアシスタントプラットフォーム",
+    "title": "ログイン",
+    "username": "ユーザー名",
+    "usernamePlaceholder": "ユーザー名を入力",
+    "password": "パスワード",
+    "passwordPlaceholder": "パスワードを入力",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを隠す",
+    "loggingIn": "ログイン中...",
+    "login": "ログイン",
+    "footer": "© {year} WebCode. All rights reserved.",
+    "githubTitle": "GitHub リポジトリを開く",
+    "validation": {
+      "usernameRequired": "ユーザー名を入力してください",
+      "passwordRequired": "パスワードを入力してください"
+    },
+    "error": {
+      "invalidCredentials": "ユーザー名またはパスワードが正しくありません",
+      "loginFailed": "ログイン失敗: {message}"
+    }
   },
   "setup": {
     "pageTitle": "システム初期化 - WebCode",
