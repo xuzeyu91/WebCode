@@ -204,3 +204,22 @@ window.readFileAsBase64 = async function(inputId) {
     });
 };
 
+// 安全地设置 Cookie（供共享工作区使用）
+window.setShareCookie = function(name, value, expires) {
+    if (!name || typeof name !== 'string') {
+        console.error('Cookie 名称无效');
+        return;
+    }
+    // 转义特殊字符，防止 Cookie 注入
+    const safeName = encodeURIComponent(name);
+    const safeValue = encodeURIComponent(value || '');
+    document.cookie = `${safeName}=${safeValue}; path=/; expires=${expires}; SameSite=Lax`;
+};
+
+// 清除共享 Cookie
+window.clearShareCookie = function(name) {
+    if (!name || typeof name !== 'string') return;
+    const safeName = encodeURIComponent(name);
+    document.cookie = `${safeName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+};
+
