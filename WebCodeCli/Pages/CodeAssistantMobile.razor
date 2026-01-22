@@ -502,6 +502,8 @@
                     IsLoading="@_isLoading"
                     EventGroups="@ConvertToOutputEventGroups(GetPagedJsonlEventGroups())"
                     RawOutput="@_rawOutput"
+                    EmptyTitle="@T("codeAssistant.noOutput")"
+                    EmptyDescription="@T("codeAssistant.executeCode")"
                     OnLoadMore="LoadMoreEvents"
                     OnToggleGroupCallback="HandleToggleGroupCallback"
                     IsGroupOpenFunc="@(g => IsOutputGroupOpen(g))" />

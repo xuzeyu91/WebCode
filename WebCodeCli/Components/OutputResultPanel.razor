@@ -240,8 +240,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </div>
-                    <p class="text-base font-semibold text-gray-600">暂无输出结果</p>
-                    <p class="text-sm mt-2 text-gray-500">开始对话后这里将显示输出内容</p>
+                    <p class="text-base font-semibold text-gray-600">@EmptyTitle</p>
+                    <p class="text-sm mt-2 text-gray-500">@EmptyDescription</p>
                 </div>
             </div>
         }
@@ -260,6 +260,8 @@
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public List<OutputEventGroup> EventGroups { get; set; } = new();
     [Parameter] public string RawOutput { get; set; } = "";
+    [Parameter] public string EmptyTitle { get; set; } = "暂无输出结果";
+    [Parameter] public string EmptyDescription { get; set; } = "开始对话后这里将显示输出内容";
     [Parameter] public EventCallback OnLoadMore { get; set; }
     [Parameter] public EventCallback<(string groupId, bool defaultOpen)> OnToggleGroupCallback { get; set; }
     [Parameter] public Func<OutputEventGroup, bool> IsGroupOpenFunc { get; set; } = _ => false;

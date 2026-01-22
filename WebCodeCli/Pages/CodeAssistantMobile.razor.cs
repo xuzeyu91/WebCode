@@ -1334,10 +1334,20 @@ public partial class CodeAssistantMobile : ComponentBase, IAsyncDisposable
     {
         try
         {
+            if (!_messages.Any())
+            {
+                return;
+            }
+
+            var firstUserMessage = _messages.FirstOrDefault(m => m.Role == "user")?.Content;
+            var title = !string.IsNullOrWhiteSpace(firstUserMessage)
+                ? SessionHistoryManager.GenerateSessionTitle(firstUserMessage)
+                : T("codeAssistant.newSession");
+
             var session = new SessionHistory
             {
                 SessionId = _sessionId,
-                Title = _messages.FirstOrDefault()?.Content?.Take(50).ToString() ?? T("codeAssistant.newSession"),
+                Title = title,
                 Messages = _messages,
                 CreatedAt = _currentSession?.CreatedAt ?? DateTime.Now,
                 UpdatedAt = DateTime.Now
