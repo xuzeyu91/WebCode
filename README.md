@@ -172,7 +172,7 @@ cd WebCode
 dotnet restore
 
 # 运行应用
-dotnet run --project WebCode
+dotnet run --project WebCodeCli
 ```
 
 应用将在 `http://localhost:5000` 启动，访问 `/code-assistant` 开始编程！
