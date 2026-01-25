@@ -3,6 +3,7 @@ console.log('🔧 localization-helper.js 正在加载...');
 
 /**
  * 本地化管理器
+ * 使用 localStorage 存储语言设置（简单可靠，无需依赖 IndexedDB）
  */
 window.localizationHelper = (function() {
     const STORAGE_KEY = 'webcli_language';
@@ -15,7 +16,7 @@ window.localizationHelper = (function() {
     let isInitialized = false;
 
     /**
-     * 初始化本地化 - 使用 IndexedDB
+     * 初始化本地化 - 使用 localStorage
      * @returns {Promise<string>} 当前语言
      */
     async function init() {
@@ -33,34 +34,20 @@ window.localizationHelper = (function() {
             try {
                 console.log('🔄 开始初始化本地化...');
                 
-                // 等待 IndexedDB 准备就绪（最多等待 5 秒，适应慢网络）
-                let waitCount = 0;
-                const maxWait = 100; // 100 * 50ms = 5秒
-                while (!window.webCliIndexedDB?.isReady() && waitCount < maxWait) {
-                    await new Promise(resolve => setTimeout(resolve, 50));
-                    waitCount++;
-                }
-                
-                if (waitCount >= maxWait) {
-                    console.warn('⚠️ IndexedDB 等待超时，使用浏览器语言设置');
-                }
-                
-                // 尝试从 IndexedDB 读取保存的语言设置
-                if (window.webCliIndexedDB?.isReady()) {
-                    try {
-                        const savedLanguage = await window.webCliIndexedDB.getSetting('language', null);
-                        if (savedLanguage) {
-                            currentLanguage = savedLanguage;
-                            console.log(`✅ 从 IndexedDB 加载语言设置: ${currentLanguage}`);
-                            isInitialized = true;
-                            return currentLanguage;
-                        }
-                    } catch (dbError) {
-                        console.warn('⚠️ 从 IndexedDB 读取语言设置失败:', dbError);
+                // 从 localStorage 读取保存的语言设置
+                try {
+                    const savedLanguage = localStorage.getItem(STORAGE_KEY);
+                    if (savedLanguage) {
+                        currentLanguage = savedLanguage;
+                        console.log(`✅ 从 localStorage 加载语言设置: ${currentLanguage}`);
+                        isInitialized = true;
+                        return currentLanguage;
                     }
+                } catch (storageError) {
+                    console.warn('⚠️ 从 localStorage 读取语言设置失败:', storageError);
                 }
                 
-                // 如果 IndexedDB 没有设置，尝试从浏览器语言自动检测
+                // 如果 localStorage 没有设置，尝试从浏览器语言自动检测
                 const browserLang = navigator.language || navigator.userLanguage;
                 if (browserLang) {
                     // 标准化语言代码
@@ -97,7 +84,7 @@ window.localizationHelper = (function() {
     }
 
     /**
-     * 设置当前语言 - 使用 IndexedDB
+     * 设置当前语言 - 使用 localStorage
      * @param {string} language - 语言代码
      * @returns {Promise<boolean>}
      */
@@ -110,9 +97,11 @@ window.localizationHelper = (function() {
 
             currentLanguage = language;
             
-            // 保存到 IndexedDB
-            if (window.webCliIndexedDB?.isReady()) {
-                await window.webCliIndexedDB.saveSetting('language', language);
+            // 保存到 localStorage
+            try {
+                localStorage.setItem(STORAGE_KEY, language);
+            } catch (storageError) {
+                console.warn('⚠️ 保存语言设置到 localStorage 失败:', storageError);
             }
             
             console.log(`✅ 语言已设置为: ${language}`);

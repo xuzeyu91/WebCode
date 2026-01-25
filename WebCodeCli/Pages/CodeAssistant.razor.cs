@@ -42,6 +42,7 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
     [Inject] private ISessionOutputService SessionOutputService { get; set; } = default!;
     [Inject] private IPromptTemplateService PromptTemplateService { get; set; } = default!;
     [Inject] private IInputHistoryService InputHistoryService { get; set; } = default!;
+    [Inject] private IUserContextService UserContextService { get; set; } = default!;
     
     // 本地化翻译缓存
     private Dictionary<string, string> _translations = new();
@@ -301,6 +302,30 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
                 NavigationManager.NavigateTo("/login");
                 return;
             }
+        }
+        
+        // 设置用户上下文（用于后端服务按用户隔离数据）
+        // 无论认证是否启用，都需要设置用户上下文
+        try
+        {
+            // 尝试从 sessionStorage 获取用户名
+            var storedUsername = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "username");
+            if (!string.IsNullOrWhiteSpace(storedUsername))
+            {
+                _currentUsername = storedUsername;
+                UserContextService.SetCurrentUsername(storedUsername);
+                Console.WriteLine($"[用户上下文] 从sessionStorage设置当前用户: {storedUsername}");
+            }
+            else
+            {
+                // 如果没有存储的用户名，使用 UserContextService 的默认值
+                var defaultUsername = UserContextService.GetCurrentUsername();
+                Console.WriteLine($"[用户上下文] 使用默认用户: {defaultUsername}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[用户上下文] 设置用户上下文失败: {ex.Message}");
         }
 
         await LoadAvailableTools();
