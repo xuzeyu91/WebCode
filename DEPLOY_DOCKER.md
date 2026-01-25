@@ -442,13 +442,13 @@ docker compose restart
 
 ### Docker 镜像构建过程
 
-1. **构建阶段** (mcr.microsoft.com/dotnet/sdk:10.0)
+1. **构建阶段** (mcr.azure.cn/dotnet/sdk:10.0)
    - 安装 Node.js 20.x
    - 还原 NuGet 包
    - 构建 TailwindCSS
    - 编译 .NET 应用
 
-2. **运行时镜像** (mcr.microsoft.com/dotnet/aspnet:10.0)
+2. **运行时镜像** (mcr.azure.cn/dotnet/aspnet:10.0)
    - 安装基础依赖: curl, wget, git, python3 等
    - 安装 Node.js 20.x
    - 安装 Rust (Codex 需要)
