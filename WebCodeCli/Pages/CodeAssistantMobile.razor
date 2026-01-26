@@ -1060,20 +1060,38 @@
     
     /* 消息气泡样式 */
     .message-bubble {
-        word-break: break-word;
-        overflow-wrap: anywhere;
+        word-break: break-all !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
     }
 
     .message-bubble * {
-        overflow-wrap: anywhere;
-        word-break: break-word;
+        word-break: break-all !important;
+        overflow-wrap: break-word !important;
+        max-width: 100% !important;
     }
 
     .message-bubble pre,
     .message-bubble code {
-        white-space: pre-wrap;
-        word-break: break-word;
-        overflow-wrap: anywhere;
+        white-space: pre-wrap !important;
+        word-break: break-all !important;
+        overflow-wrap: break-word !important;
+        max-width: 100% !important;
+    }
+
+    .message-bubble table {
+        table-layout: fixed !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .message-bubble table th,
+    .message-bubble table td {
+        word-break: break-all !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
     }
     
     /* 底部固定元素的阴影 */

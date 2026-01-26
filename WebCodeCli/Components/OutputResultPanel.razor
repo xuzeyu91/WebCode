@@ -3,8 +3,8 @@
 @using Markdig
 @inject IJSRuntime JSRuntime
 
-<div class="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 h-full flex flex-col overflow-hidden">
-    <div id="@ContainerId" class="flex-1 overflow-auto p-3 sm:p-4 lg:p-5" style="contain: layout style paint; content-visibility: auto;">
+<div class="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 h-full flex flex-col overflow-hidden min-w-0">
+    <div id="@ContainerId" class="flex-1 overflow-auto p-3 sm:p-4 lg:p-5 min-w-0" style="contain: layout style paint; content-visibility: auto;">
         @if (HasOutputEvents)
         {
             <div class="space-y-4">
@@ -50,15 +50,15 @@
                         var badgeClass = GetEventBadgeClass(evt);
                         var badgeLabel = GetEventBadgeLabel(evt);
 
-                        <div @key="@group.Id" class="@($"border border-gray-200 rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all {containerAccent}")">
-                            <div class="flex items-center justify-between gap-3 mb-3">
-                                <div class="flex items-center gap-2.5">
+                        <div @key="@group.Id" class="@($"border border-gray-200 rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all overflow-hidden min-w-0 {containerAccent}")">
+                            <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                                <div class="flex items-center gap-2.5 min-w-0 flex-wrap">
                                     <span class="@($"text-xs font-bold px-2.5 py-1 rounded-full {badgeClass} shadow-sm")">@badgeLabel</span>
-                                    <span class="text-sm font-semibold text-gray-800">@GetEventDisplayTitle(evt)</span>
+                                    <span class="text-sm font-semibold text-gray-800 break-all">@GetEventDisplayTitle(evt)</span>
                                 </div>
                                 <span class="text-xs text-gray-500 font-medium">@evt.Type</span>
                             </div>
-                            <div class="mt-2 text-sm text-gray-700 markdown-preview leading-relaxed">
+                            <div class="mt-2 text-sm text-gray-700 markdown-preview leading-relaxed overflow-hidden" style="word-break: break-all; overflow-wrap: break-word;">
                                 @if (evt.ItemType == "todo_list")
                                 {
                                     @* 待办列表使用预格式化显示，确保换行 *@
@@ -166,22 +166,22 @@
 
                             @if (isOpen)
                             {
-                                <div class="p-3 space-y-2 bg-white">
+                                <div class="p-3 space-y-2 bg-white overflow-hidden">
                                     @foreach (var evt in group.Items)
                                     {
                                         var badgeClass = GetEventBadgeClass(evt);
                                         var badgeLabel = GetEventBadgeLabel(evt);
                                         var containerAccent = GetEventContainerAccent(evt);
 
-                                        <div class="@($"border border-gray-200 rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-md transition-all {containerAccent}")">
-                                            <div class="flex items-center justify-between gap-3 mb-3">
-                                                <div class="flex items-center gap-2.5 min-w-0">
+                                        <div class="@($"border border-gray-200 rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-md transition-all overflow-hidden min-w-0 {containerAccent}")">
+                                            <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                                                <div class="flex items-center gap-2.5 min-w-0 flex-wrap">
                                                     <span class="@($"text-xs font-bold px-2.5 py-1 rounded-full {badgeClass} shadow-sm")">@badgeLabel</span>
-                                                    <span class="text-sm font-semibold text-gray-800 truncate">@GetEventDisplayTitle(evt)</span>
+                                                    <span class="text-sm font-semibold text-gray-800 break-all">@GetEventDisplayTitle(evt)</span>
                                                 </div>
                                                 <span class="text-xs text-gray-500 font-medium flex-shrink-0">@evt.Type</span>
                                             </div>
-                                            <div class="text-sm text-gray-700 markdown-preview leading-relaxed break-words">
+                                            <div class="text-sm text-gray-700 markdown-preview leading-relaxed overflow-hidden" style="word-break: break-all; overflow-wrap: break-word;">
                                                 @if (evt.ItemType == "todo_list")
                                                 {
                                                     @* 待办列表使用预格式化显示，确保换行 *@
@@ -227,7 +227,7 @@
         }
         else if (!string.IsNullOrEmpty(RawOutput))
         {
-            <div class="markdown-preview text-xs sm:text-sm leading-relaxed p-2 sm:p-3 lg:p-4 bg-white border border-gray-200 rounded" style="min-height: 100%;">
+            <div class="markdown-preview text-xs sm:text-sm leading-relaxed p-2 sm:p-3 lg:p-4 bg-white border border-gray-200 rounded break-all" style="min-height: 100%; word-break: break-all;">
                 @((MarkupString)RenderMarkdown(RawOutput))
             </div>
         }
@@ -410,3 +410,32 @@
         return value.Value.ToString("N0");
     }
 }
+
+<style>
+    /* 输出面板内容强制换行样式 */
+    .markdown-preview,
+    .markdown-preview * {
+        word-break: break-all !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
+        max-width: 100% !important;
+    }
+
+    .markdown-preview pre,
+    .markdown-preview code {
+        white-space: pre-wrap !important;
+        word-break: break-all !important;
+    }
+
+    .markdown-preview table {
+        table-layout: fixed !important;
+        width: 100% !important;
+    }
+
+    .markdown-preview table th,
+    .markdown-preview table td {
+        word-break: break-all !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
+    }
+</style>

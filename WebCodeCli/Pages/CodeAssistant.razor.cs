@@ -4576,7 +4576,7 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
     private string RenderJsonlContent(string content)
     {
         var html = new StringBuilder();
-        html.Append("<div class=\"space-y-2\">");
+        html.Append("<div class=\"space-y-2 overflow-hidden\">");
         
         var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
         foreach (var line in lines)
@@ -4601,7 +4601,7 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
                 var badgeClass = GetJsonlBadgeClass(eventType);
                 var badgeLabel = GetJsonlBadgeLabel(eventType);
                 
-                html.Append($"<div class=\"border border-gray-200 rounded-lg p-3 bg-white\">");
+                html.Append($"<div class=\"border border-gray-200 rounded-lg p-3 bg-white overflow-hidden\">");
                 html.Append($"<span class=\"{badgeClass} text-xs font-semibold px-2 py-0.5 rounded-full\">{badgeLabel}</span>");
                 
                 // 提取并显示内容
@@ -4610,7 +4610,7 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
                     var eventContent = contentElement.GetString();
                     if (!string.IsNullOrEmpty(eventContent))
                     {
-                        html.Append($"<div class=\"mt-2 text-sm text-gray-700 whitespace-pre-wrap\">{System.Web.HttpUtility.HtmlEncode(eventContent)}</div>");
+                        html.Append($"<div class=\"mt-2 text-sm text-gray-700 whitespace-pre-wrap\" style=\"word-break: break-all;\">{System.Web.HttpUtility.HtmlEncode(eventContent)}</div>");
                     }
                 }
                 
