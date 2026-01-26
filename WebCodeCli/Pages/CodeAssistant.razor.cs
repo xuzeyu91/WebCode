@@ -717,6 +717,12 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
                     OutputTokens = outputEvent.Usage.OutputTokens
                 };
             }
+            
+            // 转换用户问题
+            if (outputEvent.UserQuestion != null)
+            {
+                displayItem.UserQuestion = ConvertToUserQuestion(outputEvent.UserQuestion);
+            }
 
             _jsonlEvents.Add(displayItem);
 
@@ -890,9 +896,10 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
         {
             Type = "turn.completed",
             Title = T("cliEvent.title.turnCompleted"),
+            // 当有 Usage 信息时，Content 设为空，只显示 Token 统计，避免与最后一条消息重复
             Content = usage is null
                 ? T("cliEvent.content.turnCompleted")
-                : T("cliEvent.content.turnCompletedWithUsage"),
+                : string.Empty,
             Usage = usage
         });
     }
@@ -1793,6 +1800,14 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
             return outputEvent.Usage is null
                 ? T("cliEvent.content.turnCompleted")
                 : T("cliEvent.content.turnCompletedWithUsage");
+        }
+
+        // result 类型事件与 turn.completed 类似，有 Usage 时不显示内容，避免重复
+        if (string.Equals(outputEvent.EventType, "result", StringComparison.OrdinalIgnoreCase))
+        {
+            return outputEvent.Usage is null
+                ? (fallbackContent ?? T("cliEvent.content.turnCompleted"))
+                : string.Empty;
         }
 
         if (string.Equals(outputEvent.EventType, "turn.started", StringComparison.OrdinalIgnoreCase))
@@ -3205,6 +3220,13 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
         OpenEnvConfig();
     }
     
+    private async Task CheckForUpdateFromDropdown()
+    {
+        _showUserDropdown = false;
+        StateHasChanged();
+        await CheckForUpdate();
+    }
+    
     private async Task HandleLogoutFromDropdown()
     {
         _showUserDropdown = false;
@@ -3334,6 +3356,11 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
         public string? ItemType { get; set; }
         public JsonlUsageDetail? Usage { get; set; }
         public bool IsUnknown { get; set; }
+        
+        /// <summary>
+        /// 用户问题（用于 AskUserQuestion 工具）
+        /// </summary>
+        public UserQuestion? UserQuestion { get; set; }
     }
 
     private sealed class JsonlEventGroup
@@ -3412,8 +3439,26 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
         {
             return false;
         }
+        
+        // user_question 需要用户交互，不能折叠隐藏
+        if (string.Equals(evt.ItemType, "user_question", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
 
         return evt.Type == "tool_use" || evt.Type == "tool_result";
+    }
+
+    private static bool IsCompletionEvent(JsonlDisplayItem evt)
+    {
+        // 判断是否为完成类型的事件（这些事件默认折叠起来）
+        return evt.Type == "turn.completed" || 
+               evt.Type == "thread.completed" || 
+               evt.Type == "item.completed" || 
+               evt.Type == "session_end" || 
+               evt.Type == "complete" || 
+               evt.Type == "step_finish" ||
+               evt.Type == "result";
     }
 
     private List<JsonlEventGroup> GetJsonlEventGroups()
@@ -3534,7 +3579,22 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
                 continue;
             }
 
-            // 3) 其他事件：保持现状（单条卡片）
+            // 3) 完成类型事件：设置为可折叠（默认折叠）
+            if (IsCompletionEvent(evt))
+            {
+                groups.Add(new JsonlEventGroup
+                {
+                    Id = $"evt-{i}",
+                    Kind = "completion",
+                    IsCollapsible = true,
+                    IsCompleted = true,
+                    Title = evt.Title,
+                    Items = { evt }
+                });
+                continue;
+            }
+
+            // 4) 其他事件：保持现状（单条卡片）
             groups.Add(new JsonlEventGroup
             {
                 Id = $"evt-{i}",
@@ -5779,7 +5839,8 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
                     CachedInputTokens = (int?)i.Usage.CachedInputTokens,
                     OutputTokens = (int?)i.Usage.OutputTokens,
                     TotalTokens = (int?)i.Usage.TotalTokens
-                } : null
+                } : null,
+                UserQuestion = i.UserQuestion
             }).ToList()
         }).ToList();
     }
@@ -5805,6 +5866,68 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
     private void HandleToggleGroup((string groupId, bool defaultOpen) args)
     {
         ToggleJsonlGroup(args.groupId, args.defaultOpen);
+    }
+
+    /// <summary>
+    /// 将 CliUserQuestion 转换为 UserQuestion
+    /// </summary>
+    private static UserQuestion ConvertToUserQuestion(CliUserQuestion cliQuestion)
+    {
+        return new UserQuestion
+        {
+            ToolUseId = cliQuestion.ToolUseId,
+            IsAnswered = false,
+            Questions = cliQuestion.Questions.Select(q => new QuestionItem
+            {
+                Header = q.Header,
+                Question = q.Question,
+                MultiSelect = q.MultiSelect,
+                Options = q.Options.Select(o => new QuestionOption
+                {
+                    Label = o.Label,
+                    Description = o.Description
+                }).ToList(),
+                SelectedIndexes = new List<int>()
+            }).ToList()
+        };
+    }
+
+    /// <summary>
+    /// 处理用户回答问题
+    /// </summary>
+    private async Task HandleAnswerQuestion((string toolUseId, string answer) args)
+    {
+        var (toolUseId, answer) = args;
+        
+        if (string.IsNullOrEmpty(toolUseId) || string.IsNullOrEmpty(answer))
+        {
+            return;
+        }
+
+        // 更新状态显示
+        Console.WriteLine($"[HandleAnswerQuestion] toolUseId={toolUseId}, answer={answer}");
+        
+        // 将用户回答作为新消息发送
+        // 这里我们直接将回答作为用户输入发送到当前会话
+        await SendUserAnswerToSession(answer);
+    }
+
+    /// <summary>
+    /// 将用户回答发送到会话
+    /// </summary>
+    private async Task SendUserAnswerToSession(string answer)
+    {
+        if (_isLoading)
+        {
+            Console.WriteLine("[SendUserAnswerToSession] 当前正在加载中，跳过发送");
+            return;
+        }
+
+        // 设置输入框内容为用户的回答
+        _inputMessage = answer;
+        
+        // 触发发送
+        await SendMessage();
     }
 
     #endregion

@@ -571,6 +571,43 @@ public partial class CodeAssistantMobile : ComponentBase, IAsyncDisposable
         // 移动端不需要回车发送，使用按钮
     }
     
+    /// <summary>
+    /// 处理用户回答问题（移动端）
+    /// </summary>
+    private async Task HandleAnswerQuestion((string toolUseId, string answer) args)
+    {
+        var (toolUseId, answer) = args;
+        
+        if (string.IsNullOrEmpty(toolUseId) || string.IsNullOrEmpty(answer))
+        {
+            return;
+        }
+
+        // 更新状态显示
+        Console.WriteLine($"[Mobile HandleAnswerQuestion] toolUseId={toolUseId}, answer={answer}");
+        
+        // 将用户回答作为新消息发送
+        await SendUserAnswerToSession(answer);
+    }
+
+    /// <summary>
+    /// 将用户回答发送到会话（移动端）
+    /// </summary>
+    private async Task SendUserAnswerToSession(string answer)
+    {
+        if (_isLoading)
+        {
+            Console.WriteLine("[Mobile SendUserAnswerToSession] 当前正在加载中，跳过发送");
+            return;
+        }
+
+        // 设置输入框内容为用户的回答
+        _inputMessage = answer;
+        
+        // 触发发送
+        await SendMessage();
+    }
+    
     #endregion
     
     #region JSONL事件处理
@@ -724,6 +761,12 @@ public partial class CodeAssistantMobile : ComponentBase, IAsyncDisposable
                 };
             }
 
+            // 转换用户问题（用于 AskUserQuestion 工具）
+            if (outputEvent.UserQuestion != null)
+            {
+                displayItem.UserQuestion = ConvertToUserQuestion(outputEvent.UserQuestion);
+            }
+
             _jsonlEvents.Add(displayItem);
 
             UpdateProgressTracker(outputEvent.EventType);
@@ -801,9 +844,18 @@ public partial class CodeAssistantMobile : ComponentBase, IAsyncDisposable
     {
         if (string.Equals(outputEvent.EventType, "turn.completed", StringComparison.OrdinalIgnoreCase))
         {
+            // 当有 Usage 信息时，Content 设为空，只显示 Token 统计，避免与最后一条消息重复
             return outputEvent.Usage is null
                 ? T("cliEvent.content.turnCompleted")
-                : T("cliEvent.content.turnCompletedWithUsage");
+                : string.Empty;
+        }
+
+        // result 类型事件与 turn.completed 类似，有 Usage 时不显示内容，避免重复
+        if (string.Equals(outputEvent.EventType, "result", StringComparison.OrdinalIgnoreCase))
+        {
+            return outputEvent.Usage is null
+                ? (fallbackContent ?? T("cliEvent.content.turnCompleted"))
+                : string.Empty;
         }
 
         if (string.Equals(outputEvent.EventType, "turn.started", StringComparison.OrdinalIgnoreCase))
@@ -1070,6 +1122,11 @@ public partial class CodeAssistantMobile : ComponentBase, IAsyncDisposable
                         IsCompleted = false
                     };
                     activeToolGroup.Items.Add(evt);
+                    if (IsUserQuestionEvent(evt))
+                    {
+                        activeToolGroup.IsCollapsible = false;
+                        activeToolGroup.IsCompleted = false;
+                    }
                     groups.Add(activeToolGroup);
                     continue;
                 }
@@ -1077,9 +1134,17 @@ public partial class CodeAssistantMobile : ComponentBase, IAsyncDisposable
                 if (activeToolGroup != null)
                 {
                     activeToolGroup.Items.Add(evt);
+                    if (IsUserQuestionEvent(evt))
+                    {
+                        activeToolGroup.IsCollapsible = false;
+                        activeToolGroup.IsCompleted = false;
+                    }
                     if (evt.Type == "tool_result")
                     {
-                        activeToolGroup.IsCompleted = true;
+                        if (activeToolGroup.IsCollapsible)
+                        {
+                            activeToolGroup.IsCompleted = true;
+                        }
                         activeToolGroup = null;
                     }
                     continue;
@@ -1092,6 +1157,21 @@ public partial class CodeAssistantMobile : ComponentBase, IAsyncDisposable
                     Title = evt.Title,
                     IsCompleted = true,
                     IsCollapsible = false,
+                    Items = { evt }
+                });
+                continue;
+            }
+
+            // 完成类型事件：设置为可折叠（默认折叠）
+            if (IsCompletionEvent(evt))
+            {
+                groups.Add(new JsonlEventGroup
+                {
+                    Id = $"evt-{i}",
+                    Kind = "completion",
+                    Title = evt.Title,
+                    IsCompleted = true,
+                    IsCollapsible = true,
                     Items = { evt }
                 });
                 continue;
@@ -1124,6 +1204,23 @@ public partial class CodeAssistantMobile : ComponentBase, IAsyncDisposable
             return false;
         return evt.Type == "tool_use" || evt.Type == "tool_result";
     }
+
+    private static bool IsUserQuestionEvent(JsonlDisplayItem evt)
+    {
+        return string.Equals(evt.ItemType, "user_question", StringComparison.OrdinalIgnoreCase);
+    }
+    
+    private static bool IsCompletionEvent(JsonlDisplayItem evt)
+    {
+        // 判断是否为完成类型的事件（这些事件默认折叠起来）
+        return evt.Type == "turn.completed" || 
+               evt.Type == "thread.completed" || 
+               evt.Type == "item.completed" || 
+               evt.Type == "session_end" || 
+               evt.Type == "complete" || 
+               evt.Type == "step_finish" ||
+               evt.Type == "result";
+    }
     
     private List<OutputEventGroup> ConvertToOutputEventGroups(List<JsonlEventGroup> jsonlGroups)
     {
@@ -1147,9 +1244,34 @@ public partial class CodeAssistantMobile : ComponentBase, IAsyncDisposable
                     CachedInputTokens = (int?)i.Usage.CachedInputTokens,
                     OutputTokens = (int?)i.Usage.OutputTokens,
                     TotalTokens = (int?)i.Usage.TotalTokens
-                } : null
+                } : null,
+                UserQuestion = i.UserQuestion
             }).ToList()
         }).ToList();
+    }
+
+    /// <summary>
+    /// 将 CliUserQuestion 转换为 UserQuestion
+    /// </summary>
+    private static UserQuestion ConvertToUserQuestion(CliUserQuestion cliQuestion)
+    {
+        return new UserQuestion
+        {
+            ToolUseId = cliQuestion.ToolUseId,
+            IsAnswered = false,
+            Questions = cliQuestion.Questions.Select(q => new QuestionItem
+            {
+                Header = q.Header,
+                Question = q.Question,
+                MultiSelect = q.MultiSelect,
+                Options = q.Options.Select(o => new QuestionOption
+                {
+                    Label = o.Label,
+                    Description = o.Description
+                }).ToList(),
+                SelectedIndexes = new List<int>()
+            }).ToList()
+        };
     }
     
     private void HandleToggleGroupCallback((string groupId, bool defaultOpen) args)
@@ -2435,6 +2557,11 @@ public sealed class JsonlDisplayItem
     public string? ItemType { get; set; }
     public JsonlUsageDetail? Usage { get; set; }
     public bool IsUnknown { get; set; }
+
+    /// <summary>
+    /// 用户问题（用于 AskUserQuestion 工具）
+    /// </summary>
+    public UserQuestion? UserQuestion { get; set; }
 }
 
 /// <summary>

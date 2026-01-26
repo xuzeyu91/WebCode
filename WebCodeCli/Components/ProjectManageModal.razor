@@ -380,10 +380,24 @@
     // 本地化相关
     private Dictionary<string, string> _translations = new();
     private string _currentLanguage = "zh-CN";
+    private bool _isReloadingLanguage = false;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadTranslationsAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var language = await L.GetCurrentLanguageAsync();
+        if (language != _currentLanguage && !_isReloadingLanguage)
+        {
+            _isReloadingLanguage = true;
+            _currentLanguage = language;
+            await LoadTranslationsAsync();
+            _isReloadingLanguage = false;
+            StateHasChanged();
+        }
     }
 
     public async Task ShowAsync()
@@ -393,6 +407,7 @@
         ResetForm();
         StateHasChanged();
         
+        await LoadTranslationsAsync();
         await LoadProjects();
     }
 
