@@ -1,0 +1,235 @@
+@using WebCodeCli.Domain.Domain.Model
+
+<div class="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 h-full flex flex-col overflow-hidden">
+    @if (string.IsNullOrEmpty(SelectedHtmlFile) && !DetectedFrontendProjects.Any() && !AvailablePreviewRoots.Any())
+    {
+        <div class="flex flex-col items-center justify-center h-full text-gray-400 bg-gray-50 rounded-lg sm:rounded-xl m-3 sm:m-4">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mb-3 sm:mb-4 shadow-md border border-gray-200">
+                <svg class="w-8 h-8 sm:w-10 sm:h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                </svg>
+            </div>
+            <p class="text-sm sm:text-base font-semibold text-gray-600 text-center px-4 sm:px-8">@SelectHtmlHintText</p>
+        </div>
+    }
+    else
+    {
+        <div class="p-3 sm:p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
+            <div class="flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        </svg>
+                        <span class="text-xs font-medium text-gray-600">@PreviewRootPathText</span>
+                    </div>
+                    <button @onclick="OnTogglePreviewRootSelector" 
+                            class="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        @ChangePreviewRootText
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <code class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-mono flex-1 truncate">
+                        @(string.IsNullOrEmpty(PreviewRootPath) ? "/" : "/" + PreviewRootPath)
+                    </code>
+                    @if (!string.IsNullOrEmpty(PreviewRootPath))
+                    {
+                        <button @onclick="@(() => OnSetPreviewRootPath.InvokeAsync(string.Empty))" 
+                                class="text-xs text-gray-500 hover:text-red-600" 
+                                title="@ResetToWorkspaceRootText">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    }
+                </div>
+
+                @if (ShowPreviewRootSelector && AvailablePreviewRoots.Any())
+                {
+                    <div class="mt-2 p-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        <div class="text-xs text-gray-500 mb-2 px-1">@SelectPreviewRootText</div>
+                        @foreach (var root in AvailablePreviewRoots)
+                        {
+                            <button @onclick="@(() => OnSetPreviewRootPath.InvokeAsync(root))" 
+                                    class="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-blue-50 flex items-center gap-2 @(root == PreviewRootPath ? "bg-blue-100 text-blue-700" : "text-gray-700")">
+                                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                                </svg>
+                                <span class="truncate">@(string.IsNullOrEmpty(root) ? WorkspaceRootText : root)</span>
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (DetectedFrontendProjects.Any())
+        {
+            <div class="p-3 sm:p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white">
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                        </svg>
+                        <span class="text-sm font-semibold text-gray-700">@FrontendPreviewText</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <select @bind="SelectedPreviewMode" class="px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-purple-500">
+                            <option value="static">@PreviewModeStaticText</option>
+                            <option value="dev">@PreviewModeDevText</option>
+                            <option value="build">@PreviewModeBuildText</option>
+                        </select>
+
+                        @if (SelectedPreviewMode != "static")
+                        {
+                            <select @bind="SelectedFrontendProject" class="px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-purple-500">
+                                @foreach (var proj in DetectedFrontendProjects)
+                                {
+                                    <option value="@proj.Key">@proj.Key (@ProjectTypeNameFactory(proj))</option>
+                                }
+                            </select>
+
+                            <button @onclick="OnStartPreview" 
+                                    disabled="@IsServerStarting"
+                                    class="btn-primary text-xs py-2 px-3 flex items-center justify-center gap-2 disabled:opacity-50">
+                                @if (IsServerStarting)
+                                {
+                                    <div class="animate-spin h-4 w-4 border-2 border-white rounded-full border-t-transparent"></div>
+                                    <span>@ServerStartingText</span>
+                                }
+                                else if (CurrentDevServer != null)
+                                {
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>@StopServerText</span>
+                                }
+                                else
+                                {
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>@StartPreviewText</span>
+                                }
+                            </button>
+                        }
+                    </div>
+
+                    @if (CurrentDevServer != null)
+                    {
+                        <div class="flex items-center gap-2 text-xs p-2 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span class="text-green-700 font-semibold">@ServerRunningText</span>
+                            <span class="text-gray-500">|</span>
+                            <span class="text-gray-600">@PortText: @CurrentDevServer.Port</span>
+                            <span class="text-gray-500">|</span>
+                            <span class="text-gray-600">@CurrentDevServer.ProjectInfo.Name</span>
+                            <button @onclick="OnStopServer" class="ml-auto text-red-600 hover:text-red-800">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else if (AvailablePreviewRoots.Any() && !DetectedFrontendProjects.Any() && string.IsNullOrEmpty(SelectedHtmlFile))
+        {
+            <div class="p-4 m-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-yellow-800">@NoFrontendProjectsFoundText</p>
+                        <p class="text-xs text-yellow-700 mt-1">@TryChangePreviewRootText</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(SelectedHtmlFile))
+        {
+            <div class="p-3 sm:p-4 border-b-2 border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 flex-shrink-0 bg-gray-50">
+                <div class="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+                    <span class="font-semibold text-xs sm:text-sm text-gray-700 whitespace-nowrap">@PreviewText:</span>
+                    <code class="text-[10px] sm:text-xs bg-gray-100 text-gray-800 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-mono border border-gray-300 shadow-sm truncate max-w-full">@SelectedHtmlFile</code>
+                </div>
+                <div class="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+                    <button @onclick="OnOpenHtmlInNewWindow"
+                            class="btn-primary text-[10px] sm:text-xs py-1.5 px-2 sm:px-3 flex items-center gap-1 sm:gap-1.5 shadow-md hover:shadow-lg transition-all flex-1 sm:flex-initial justify-center">
+                        <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                        @OpenInNewTabText
+                    </button>
+                    <button @onclick="OnRefreshPreview"
+                            class="btn-default text-[10px] sm:text-xs py-1.5 px-2 sm:px-3 flex items-center gap-1 sm:gap-1.5 shadow-sm hover:shadow-md transition-all flex-1 sm:flex-initial justify-center">
+                        <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        @RefreshText
+                    </button>
+                </div>
+            </div>
+        }
+
+        <div class="flex-1 border-2 border-gray-200 bg-white rounded-lg sm:rounded-xl overflow-auto m-2 sm:m-3 lg:m-4 shadow-inner">
+            <iframe id="html-preview-frame"
+                    src="@HtmlPreviewUrl"
+                    class="w-full min-h-full border-0 block rounded-lg sm:rounded-xl"
+                    sandbox="allow-scripts allow-same-origin"
+                    scrolling="no"></iframe>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string SelectedHtmlFile { get; set; } = string.Empty;
+    [Parameter] public List<FrontendProjectInfo> DetectedFrontendProjects { get; set; } = new();
+    [Parameter] public List<string> AvailablePreviewRoots { get; set; } = new();
+    [Parameter] public string PreviewRootPath { get; set; } = string.Empty;
+    [Parameter] public bool ShowPreviewRootSelector { get; set; }
+    [Parameter] public string SelectedPreviewMode { get; set; } = "static";
+    [Parameter] public string SelectedFrontendProject { get; set; } = string.Empty;
+    [Parameter] public bool IsServerStarting { get; set; }
+    [Parameter] public DevServerInfo? CurrentDevServer { get; set; }
+    [Parameter] public string HtmlPreviewUrl { get; set; } = string.Empty;
+
+    [Parameter] public EventCallback OnTogglePreviewRootSelector { get; set; }
+    [Parameter] public EventCallback<string> OnSetPreviewRootPath { get; set; }
+    [Parameter] public EventCallback OnStartPreview { get; set; }
+    [Parameter] public EventCallback OnStopServer { get; set; }
+    [Parameter] public EventCallback OnOpenHtmlInNewWindow { get; set; }
+    [Parameter] public EventCallback OnRefreshPreview { get; set; }
+
+    [Parameter] public Func<FrontendProjectInfo, string> ProjectTypeNameFactory { get; set; } = _ => string.Empty;
+
+    [Parameter] public string SelectHtmlHintText { get; set; } = string.Empty;
+    [Parameter] public string PreviewRootPathText { get; set; } = string.Empty;
+    [Parameter] public string ChangePreviewRootText { get; set; } = string.Empty;
+    [Parameter] public string ResetToWorkspaceRootText { get; set; } = string.Empty;
+    [Parameter] public string SelectPreviewRootText { get; set; } = string.Empty;
+    [Parameter] public string WorkspaceRootText { get; set; } = string.Empty;
+    [Parameter] public string FrontendPreviewText { get; set; } = string.Empty;
+    [Parameter] public string PreviewModeStaticText { get; set; } = string.Empty;
+    [Parameter] public string PreviewModeDevText { get; set; } = string.Empty;
+    [Parameter] public string PreviewModeBuildText { get; set; } = string.Empty;
+    [Parameter] public string ServerStartingText { get; set; } = string.Empty;
+    [Parameter] public string StopServerText { get; set; } = string.Empty;
+    [Parameter] public string StartPreviewText { get; set; } = string.Empty;
+    [Parameter] public string ServerRunningText { get; set; } = string.Empty;
+    [Parameter] public string PortText { get; set; } = string.Empty;
+    [Parameter] public string NoFrontendProjectsFoundText { get; set; } = string.Empty;
+    [Parameter] public string TryChangePreviewRootText { get; set; } = string.Empty;
+    [Parameter] public string PreviewText { get; set; } = string.Empty;
+    [Parameter] public string OpenInNewTabText { get; set; } = string.Empty;
+    [Parameter] public string RefreshText { get; set; } = string.Empty;
+}

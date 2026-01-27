@@ -1,0 +1,88 @@
+@if (Show)
+{
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 h-full flex flex-col overflow-hidden">
+        <div class="border-b border-gray-200 px-2 sm:px-4 py-2 bg-gray-50 overflow-x-auto">
+            <nav class="flex space-x-1 sm:space-x-2 min-w-max">
+                <button @onclick="@(() => OnSubTabChanged.InvokeAsync("files"))"
+                        class="@GetSubTabClass("files") whitespace-nowrap py-2 px-2 sm:px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all flex items-center gap-1 sm:gap-1.5">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                    </svg>
+                    <span>@FilesTabText</span>
+                </button>
+                <button @onclick="@(() => OnSubTabChanged.InvokeAsync("history"))"
+                        class="@GetSubTabClass("history") whitespace-nowrap py-2 px-2 sm:px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all flex items-center gap-1 sm:gap-1.5">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>@HistoryTabText</span>
+                </button>
+                <button @onclick="@(() => OnSubTabChanged.InvokeAsync("diff"))"
+                        class="@GetSubTabClass("diff") whitespace-nowrap py-2 px-2 sm:px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all flex items-center gap-1 sm:gap-1.5">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                    </svg>
+                    <span>@DiffTabText</span>
+                </button>
+                <button @onclick="@(() => OnSubTabChanged.InvokeAsync("monitor"))"
+                        class="@GetSubTabClass("monitor") whitespace-nowrap py-2 px-2 sm:px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all flex items-center gap-1 sm:gap-1.5">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    <span>@MonitorTabText</span>
+                </button>
+                <button @onclick="@(() => OnSubTabChanged.InvokeAsync("search"))"
+                        class="@GetSubTabClass("search") whitespace-nowrap py-2 px-2 sm:px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all flex items-center gap-1 sm:gap-1.5">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <span>@SearchTabText</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="flex-1 overflow-hidden">
+            @if (SubTab == "files")
+            {
+                @FilesContent
+            }
+            else if (SubTab == "history")
+            {
+                @HistoryContent
+            }
+            else if (SubTab == "diff")
+            {
+                @DiffContent
+            }
+            else if (SubTab == "monitor")
+            {
+                @MonitorContent
+            }
+            else if (SubTab == "search")
+            {
+                @SearchContent
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Show { get; set; } = true;
+    [Parameter] public string SubTab { get; set; } = "files";
+    [Parameter] public EventCallback<string> OnSubTabChanged { get; set; }
+
+    [Parameter] public string FilesTabText { get; set; } = string.Empty;
+    [Parameter] public string HistoryTabText { get; set; } = string.Empty;
+    [Parameter] public string DiffTabText { get; set; } = string.Empty;
+    [Parameter] public string MonitorTabText { get; set; } = string.Empty;
+    [Parameter] public string SearchTabText { get; set; } = string.Empty;
+
+    [Parameter] public Func<string, string> GetSubTabClass { get; set; } = _ => string.Empty;
+
+    [Parameter] public RenderFragment? FilesContent { get; set; }
+    [Parameter] public RenderFragment? HistoryContent { get; set; }
+    [Parameter] public RenderFragment? DiffContent { get; set; }
+    [Parameter] public RenderFragment? MonitorContent { get; set; }
+    [Parameter] public RenderFragment? SearchContent { get; set; }
+}

@@ -200,9 +200,6 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
     // 键盘事件状态
     private bool _isKeyDownEnterWithoutShift = false;
     
-    // 移动端预览区折叠状态
-    private bool _isPreviewCollapsed = false;
-
     // PC 端左右面板拖拽宽度
     private int _chatPanelWidth = 600;
     private const int ChatPanelMinWidth = 360;
@@ -3237,12 +3234,6 @@ public partial class CodeAssistant : ComponentBase, IAsyncDisposable
     {
         _showUserDropdown = false;
         await OnLanguageChanged(languageCode);
-    }
-
-    private void TogglePreviewPanel()
-    {
-        _isPreviewCollapsed = !_isPreviewCollapsed;
-        StateHasChanged();
     }
 
     private void ShowDeleteConfirmDialog(WorkspaceFileNode node)

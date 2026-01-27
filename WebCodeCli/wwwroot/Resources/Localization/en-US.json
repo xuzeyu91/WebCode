@@ -71,7 +71,7 @@
       "custom": "Custom"
     },
     "noTemplates": "No templates available",
-    "addTemplate": "Add Template",
+    "addTemplate": "Add",
     "editTemplate": "Edit Template",
     "deleteTemplate": "Delete Template",
     "templateName": "Template Name",
@@ -87,8 +87,8 @@
     "favorite": "Favorite",
     "unfavorite": "Unfavorite",
     "useTemplate": "Use Template",
-    "importTemplates": "Import Templates",
-    "exportTemplates": "Export Templates",
+    "importTemplates": "Import",
+    "exportTemplates": "Export",
     "variables": "Variables",
     "variableHint": "Use {{variableName}} in content to define variables"
   },

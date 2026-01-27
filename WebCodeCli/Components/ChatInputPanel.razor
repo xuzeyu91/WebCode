@@ -1,0 +1,181 @@
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+@using WebCodeCli.Domain.Domain.Model
+
+<div class="border-t-2 border-gray-200 pt-3 sm:pt-4 lg:pt-5 flex-shrink-0 bg-white/50 backdrop-blur-sm rounded-t-lg sm:rounded-t-xl -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 -mb-3 sm:-mb-4 lg:-mb-6 pb-3 sm:pb-4 lg:pb-6">
+    <div class="mb-3 flex flex-col gap-2">
+        <label class="text-[10px] sm:text-xs text-gray-600 font-medium px-1">@UploadFileText</label>
+        <div class="flex items-center gap-2">
+            <select value="@SelectedUploadFolder"
+                    @onchange="OnUploadFolderChanged"
+                    class="flex-1 px-2 sm:px-3 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-500 focus:border-gray-500 text-xs sm:text-sm bg-white shadow-sm hover:border-gray-300 transition-all h-10 sm:h-11">
+                <option value="">@RootFolderText</option>
+                @foreach (var folder in AvailableFolders)
+                {
+                    <option value="@folder">@folder</option>
+                }
+            </select>
+            <label class="btn-default flex items-center gap-1 sm:gap-1.5 h-10 sm:h-11 px-3 sm:px-4 py-2 sm:py-2.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm hover:shadow-md transition-all flex-shrink-0"
+                   title="@UploadToWorkspaceTitle">
+                @if (IsUploading)
+                {
+                    <div class="animate-spin h-3.5 w-3.5 sm:h-4 sm:w-4 border-2 border-gray-600 rounded-full border-t-transparent"></div>
+                }
+                else
+                {
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                }
+                <span class="hidden sm:inline">@SelectFileText</span>
+                <InputFile OnChange="OnFileUpload" disabled="@IsUploading" class="hidden" />
+            </label>
+        </div>
+    </div>
+
+    <div class="flex items-end gap-2 sm:gap-3 relative">
+        <div class="flex-1 relative">
+            <textarea value="@InputMessage"
+                      @oninput="HandleInput"
+                      @onkeydown="OnKeyDown"
+                      @onkeydown:preventDefault="@PreventDefaultOnEnter"
+                      data-skill-tab-enabled="@(ShowSkillPicker && FilteredSkills.Any())"
+                      id="input-message"
+                      placeholder="@InputPlaceholder"
+                      rows="3"
+                      maxlength="5000"
+                      disabled="@IsLoading"
+                      style="max-height: 400px;"
+                      class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-vertical disabled:bg-gray-100 disabled:cursor-not-allowed text-xs sm:text-sm bg-white shadow-sm hover:border-gray-300 transition-all overflow-x-hidden min-h-[72px]"></textarea>
+
+            @AutoCompleteContent
+
+            @if (ShowSkillPicker)
+            {
+                <div class="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-80 overflow-hidden" data-skill-picker="true">
+                    <div class="px-3 py-2 border-b border-gray-200 bg-gray-50">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                            <span class="text-sm font-semibold text-gray-800">@SelectSkillText</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full @CurrentToolBadgeClass">@CurrentToolName</span>
+                            <span class="text-xs text-gray-500 ml-auto">@FilteredSkills.Count / @AllSkillsCount</span>
+                            @if (!string.IsNullOrEmpty(SkillFilter))
+                            {
+                                <span class="text-xs text-blue-600 font-medium">@FilterText: @SkillFilter</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="overflow-y-auto max-h-60 pb-2">
+                        @if (FilteredSkills.Any())
+                        {
+                            @foreach (var skill in FilteredSkills)
+                            {
+                                <div @onclick="@(() => OnSelectSkill.InvokeAsync(skill))"
+                                     title="@skill.Description"
+                                     data-skill-item="true"
+                                     class="px-3 py-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors">
+                                    <div class="flex items-start gap-2">
+                                        <div class="flex-shrink-0 mt-0.5">
+                                            <svg class="w-4 h-4 @SkillIconColor(skill)" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-sm font-medium text-gray-800">@skill.Name</span>
+                                                <span class="text-[10px] px-1.5 py-0.5 rounded-full @SkillBadgeClass(skill)">@skill.Source</span>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1 truncate">@skill.Description</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="p-4 text-center text-gray-500 text-sm">
+                                <svg class="w-10 h-10 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p>@NoMatchingSkillsText</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="flex flex-col items-end gap-1.5 sm:gap-2 flex-shrink-0">
+            <span class="text-[10px] sm:text-xs text-gray-500 font-medium whitespace-nowrap">@InputLengthText</span>
+            <button @onclick="OnSendMessage"
+                    disabled="@IsLoading"
+                    class="btn-primary flex items-center gap-1.5 sm:gap-2 shadow-md hover:shadow-lg transition-all h-10 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm">
+                @if (IsLoading)
+                {
+                    <div class="animate-spin h-3.5 w-3.5 sm:h-4 sm:w-4 border-2 border-white rounded-full border-t-transparent"></div>
+                }
+                else
+                {
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                }
+                @SendText
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string UploadFileText { get; set; } = string.Empty;
+    [Parameter] public string RootFolderText { get; set; } = string.Empty;
+    [Parameter] public string UploadToWorkspaceTitle { get; set; } = string.Empty;
+    [Parameter] public string SelectFileText { get; set; } = string.Empty;
+    [Parameter] public string InputPlaceholder { get; set; } = string.Empty;
+    [Parameter] public string SelectSkillText { get; set; } = string.Empty;
+    [Parameter] public string FilterText { get; set; } = string.Empty;
+    [Parameter] public string NoMatchingSkillsText { get; set; } = string.Empty;
+    [Parameter] public string SendText { get; set; } = string.Empty;
+
+    [Parameter] public string InputMessage { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> InputMessageChanged { get; set; }
+    [Parameter] public EventCallback OnAfterInput { get; set; }
+    [Parameter] public EventCallback<KeyboardEventArgs> OnKeyDown { get; set; }
+    [Parameter] public bool PreventDefaultOnEnter { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsUploading { get; set; }
+
+    [Parameter] public string SelectedUploadFolder { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> SelectedUploadFolderChanged { get; set; }
+    [Parameter] public IReadOnlyList<string> AvailableFolders { get; set; } = Array.Empty<string>();
+    [Parameter] public EventCallback<InputFileChangeEventArgs> OnFileUpload { get; set; }
+
+    [Parameter] public bool ShowSkillPicker { get; set; }
+    [Parameter] public IReadOnlyList<SkillItem> FilteredSkills { get; set; } = Array.Empty<SkillItem>();
+    [Parameter] public int AllSkillsCount { get; set; }
+    [Parameter] public string SkillFilter { get; set; } = string.Empty;
+    [Parameter] public string CurrentToolBadgeClass { get; set; } = string.Empty;
+    [Parameter] public string CurrentToolName { get; set; } = string.Empty;
+    [Parameter] public Func<SkillItem, string> SkillIconColor { get; set; } = _ => string.Empty;
+    [Parameter] public Func<SkillItem, string> SkillBadgeClass { get; set; } = _ => string.Empty;
+    [Parameter] public EventCallback<SkillItem> OnSelectSkill { get; set; }
+
+    [Parameter] public string InputLengthText { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnSendMessage { get; set; }
+
+    [Parameter] public RenderFragment? AutoCompleteContent { get; set; }
+
+    private async Task HandleInput(ChangeEventArgs args)
+    {
+        var value = args.Value?.ToString() ?? string.Empty;
+        await InputMessageChanged.InvokeAsync(value);
+        await OnAfterInput.InvokeAsync();
+    }
+
+    private Task OnUploadFolderChanged(ChangeEventArgs args)
+    {
+        var value = args.Value?.ToString() ?? string.Empty;
+        return SelectedUploadFolderChanged.InvokeAsync(value);
+    }
+}

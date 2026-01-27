@@ -1,0 +1,92 @@
+@using WebCodeCli.Domain.Domain.Model
+
+<div id="chat-messages-container" class="flex-1 overflow-y-auto overflow-x-hidden space-y-2 sm:space-y-3 mb-3 sm:mb-4 lg:mb-5">
+    @foreach (var message in Messages)
+    {
+        <div class="@(message.Role == "user" ? "bg-white border-l-4 border-gray-300 shadow-sm" : "bg-gray-50 border-l-4 border-blue-500 shadow-sm") rounded-lg sm:rounded-xl p-3 sm:p-4 hover:shadow-md transition-all border border-gray-100 overflow-hidden">
+            <div class="flex justify-between items-center mb-2 sm:mb-3">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    @if (message.Role == "user")
+                    {
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center shadow-sm">
+                            <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                        <span class="font-bold text-sm sm:text-base text-gray-700">@UserLabel</span>
+                    }
+                    else
+                    {
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md">
+                            <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                        </div>
+                        <span class="font-bold text-sm sm:text-base text-blue-700">@AssistantLabel</span>
+                    }
+                </div>
+                <span class="text-[10px] sm:text-xs text-gray-500 font-medium">@message.CreatedAt.ToString("HH:mm:ss")</span>
+            </div>
+            <div class="text-xs sm:text-sm">
+                @if (message.HasError)
+                {
+                    <div class="bg-red-50 border-l-4 border-red-500 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-sm" role="alert">
+                        <div class="flex items-start gap-2">
+                            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="block">@message.ErrorMessage</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    var content = message.Content ?? string.Empty;
+                    if (IsJsonlContent(content))
+                    {
+                        @((MarkupString)RenderJsonlContent(content))
+                    }
+                    else
+                    {
+                        <div class="max-h-60 sm:max-h-96 overflow-y-auto text-gray-700 leading-relaxed markdown-preview" style="word-break: break-all;">@RenderMarkdown(content)</div>
+                    }
+                }
+            </div>
+        </div>
+    }
+
+    @if (IsLoading)
+    {
+        <div class="bg-gray-50 border-l-4 border-blue-500 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-md animate-pulse overflow-hidden">
+            <div class="flex justify-between items-center mb-2 sm:mb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-md">
+                        <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-sm sm:text-base text-blue-700">@AssistantLabel</span>
+                </div>
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="text-[10px] sm:text-xs text-blue-600 font-semibold">@ThinkingText</span>
+                    <div class="animate-spin h-3 w-3 sm:h-4 sm:w-4 border-2 border-blue-600 rounded-full border-t-transparent"></div>
+                </div>
+            </div>
+            <div class="text-xs sm:text-sm max-h-60 sm:max-h-96 overflow-y-auto overflow-x-hidden text-gray-700 leading-relaxed break-words">@RenderMarkdown(CurrentAssistantMessage)</div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<ChatMessage> Messages { get; set; } = Array.Empty<ChatMessage>();
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string CurrentAssistantMessage { get; set; } = string.Empty;
+
+    [Parameter] public string UserLabel { get; set; } = string.Empty;
+    [Parameter] public string AssistantLabel { get; set; } = string.Empty;
+    [Parameter] public string ThinkingText { get; set; } = string.Empty;
+
+    [Parameter] public Func<string, bool> IsJsonlContent { get; set; } = _ => false;
+    [Parameter] public Func<string, string> RenderJsonlContent { get; set; } = _ => string.Empty;
+    [Parameter] public Func<string, MarkupString> RenderMarkdown { get; set; } = _ => new MarkupString(string.Empty);
+}

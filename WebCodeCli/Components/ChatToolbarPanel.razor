@@ -1,0 +1,55 @@
+@if (Show)
+{
+    <div class="flex gap-2 sm:gap-3 mb-3 sm:mb-4 lg:mb-5 flex-shrink-0 flex-wrap">
+        @LeadingContent
+        <button @onclick="OnToggleSessionList"
+                class="btn-default flex items-center gap-1 sm:gap-1.5 whitespace-nowrap shadow-sm hover:shadow-md transition-all text-xs sm:text-sm px-3 sm:px-4 py-2 min-h-[40px] sm:min-h-[44px]"
+                title="@SessionHistoryTitle">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="hidden sm:inline">@SessionHistoryText</span>
+        </button>
+        <button @onclick="OnShowProjectManage"
+                class="btn-default flex items-center gap-1 sm:gap-1.5 whitespace-nowrap shadow-sm hover:shadow-md transition-all text-xs sm:text-sm px-3 sm:px-4 py-2 min-h-[40px] sm:min-h-[44px]"
+                title="@ProjectTitle">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+            </svg>
+            <span class="hidden sm:inline">@ProjectText</span>
+        </button>
+        <button @onclick="OnToggleContext"
+                class="btn-default flex items-center gap-1 sm:gap-1.5 whitespace-nowrap shadow-sm hover:shadow-md transition-all text-xs sm:text-sm px-3 sm:px-4 py-2 min-h-[40px] sm:min-h-[44px]"
+                title="@ContextTitle">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span class="hidden sm:inline">@ContextText</span>
+        </button>
+        <button @onclick="OnClearChat"
+                class="btn-default flex items-center gap-1 sm:gap-1.5 whitespace-nowrap shadow-sm hover:shadow-md transition-all text-xs sm:text-sm px-3 sm:px-4 py-2 min-h-[40px] sm:min-h-[44px]">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            <span class="hidden sm:inline">@ClearChatText</span>
+        </button>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Show { get; set; } = true;
+    [Parameter] public RenderFragment? LeadingContent { get; set; }
+
+    [Parameter] public string SessionHistoryTitle { get; set; } = string.Empty;
+    [Parameter] public string SessionHistoryText { get; set; } = string.Empty;
+    [Parameter] public string ProjectTitle { get; set; } = string.Empty;
+    [Parameter] public string ProjectText { get; set; } = string.Empty;
+    [Parameter] public string ContextTitle { get; set; } = string.Empty;
+    [Parameter] public string ContextText { get; set; } = string.Empty;
+    [Parameter] public string ClearChatText { get; set; } = string.Empty;
+
+    [Parameter] public EventCallback OnToggleSessionList { get; set; }
+    [Parameter] public EventCallback OnShowProjectManage { get; set; }
+    [Parameter] public EventCallback OnToggleContext { get; set; }
+    [Parameter] public EventCallback OnClearChat { get; set; }
+}

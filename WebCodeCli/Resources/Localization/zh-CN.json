@@ -71,7 +71,7 @@
       "custom": "自定义"
     },
     "noTemplates": "暂无模板",
-    "addTemplate": "添加模板",
+    "addTemplate": "添加",
     "editTemplate": "编辑模板",
     "deleteTemplate": "删除模板",
     "templateName": "模板名称",
@@ -87,8 +87,8 @@
     "favorite": "收藏",
     "unfavorite": "取消收藏",
     "useTemplate": "使用模板",
-    "importTemplates": "导入模板",
-    "exportTemplates": "导出模板",
+    "importTemplates": "导入",
+    "exportTemplates": "导出",
     "variables": "变量",
     "variableHint": "在内容中使用 {{变量名}} 来定义变量"
   },

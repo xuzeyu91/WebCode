@@ -1,0 +1,172 @@
+@using WebCodeCli.Domain.Domain.Model
+@using Microsoft.AspNetCore.Components.Forms
+
+<div class="h-full flex flex-col">
+    @if (!HasWorkspaceFiles)
+    {
+        <div class="p-3 sm:p-4 border-b border-gray-200 flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <span class="font-bold text-sm sm:text-base flex-1 text-gray-800">@WorkspaceFilesText</span>
+            <button @onclick="OnShowCreateFolder"
+                    class="btn-default text-[10px] sm:text-xs py-1.5 px-2 sm:px-3 flex items-center gap-1 sm:gap-1.5 shadow-sm hover:shadow-md transition-all">
+                <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+                </svg>
+                <span class="hidden sm:inline">@CreateFolderText</span>
+            </button>
+            <label class="btn-primary text-[10px] sm:text-xs py-1.5 px-2 sm:px-3 flex items-center gap-1 sm:gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md hover:shadow-lg transition-all">
+                @if (IsUploading)
+                {
+                    <div class="animate-spin h-3 w-3 border-2 border-white rounded-full border-t-transparent"></div>
+                }
+                else
+                {
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                }
+                @UploadText
+                <InputFile OnChange="OnFileUpload" disabled="@IsUploading" class="hidden" />
+            </label>
+        </div>
+        <div class="flex flex-col items-center justify-center flex-1 text-gray-400 bg-gray-50 rounded-lg sm:rounded-xl m-3 sm:m-4">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 border border-gray-200 rounded-full flex items-center justify-center mb-3 sm:mb-4 shadow-md">
+                <svg class="w-8 h-8 sm:w-10 sm:h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <p class="text-sm sm:text-base font-semibold text-gray-600">@NoWorkspaceText</p>
+            <p class="text-xs sm:text-sm mt-1.5 sm:mt-2 text-gray-500">@StartConversationText</p>
+        </div>
+    }
+    else
+    {
+        <div class="p-3 sm:p-4 border-b border-gray-200 flex flex-col gap-2 flex-shrink-0">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <span class="font-bold text-sm sm:text-base flex-1 text-gray-800">@WorkspaceFilesText</span>
+                <button @onclick="OnShowCreateFolder"
+                        class="btn-default text-[10px] sm:text-xs py-1.5 px-2 sm:px-3 flex items-center gap-1 sm:gap-1.5 shadow-sm hover:shadow-md transition-all">
+                    <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">@CreateFolderText</span>
+                </button>
+                <label class="btn-default text-[10px] sm:text-xs py-1.5 px-2 sm:px-3 flex items-center gap-1 sm:gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm hover:shadow-md transition-all">
+                    @if (IsUploading)
+                    {
+                        <div class="animate-spin h-3 w-3 border-2 border-gray-600 rounded-full border-t-transparent"></div>
+                    }
+                    else
+                    {
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                    }
+                    @UploadText
+                    <InputFile OnChange="OnFileUpload" disabled="@IsUploading" class="hidden" />
+                </label>
+                <button @onclick="OnDownloadAll"
+                        class="btn-primary text-[10px] sm:text-xs py-1.5 px-2 sm:px-3 flex items-center gap-1 sm:gap-1.5 shadow-md hover:shadow-lg transition-all">
+                    <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    <span class="hidden sm:inline">@DownloadAllText</span>
+                    <span class="sm:hidden">@DownloadShortText</span>
+                </button>
+            </div>
+
+            @if (SelectedFilesCount > 0)
+            {
+                <div class="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                    <span class="text-xs text-blue-700 font-semibold">@SelectedItemsTextFactory(SelectedFilesCount)</span>
+                    <div class="flex-1"></div>
+                    <button @onclick="@(() => OnBatchOperation.InvokeAsync("move"))"
+                            class="btn-default text-[10px] py-1 px-2 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
+                        @MoveText
+                    </button>
+                    <button @onclick="@(() => OnBatchOperation.InvokeAsync("copy"))"
+                            class="btn-default text-[10px] py-1 px-2 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        @CopyText
+                    </button>
+                    <button @onclick="@(() => OnBatchOperation.InvokeAsync("delete"))"
+                            class="btn-default text-[10px] py-1 px-2 flex items-center gap-1 text-red-600 hover:bg-red-50">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        @DeleteText
+                    </button>
+                    <button @onclick="OnClearSelection"
+                            class="btn-default text-[10px] py-1 px-2">
+                        @CancelText
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="flex items-center gap-2">
+                    <button @onclick="OnToggleSelectAll"
+                            class="btn-default text-[10px] py-1 px-2 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                        @SelectAllText
+                    </button>
+                </div>
+            }
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-2 sm:p-3" @onscroll="OnScroll">
+            <div class="space-y-0.5 sm:space-y-1">
+                @FileNodes
+                @if (HasMoreNodes)
+                {
+                    <div class="text-center py-3">
+                        <button @onclick="OnLoadMoreNodes" class="btn-default text-xs py-1.5 px-4">
+                            <span>@LoadMoreTextFactory(RemainingNodesCount)</span>
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public bool HasWorkspaceFiles { get; set; }
+    [Parameter] public bool IsUploading { get; set; }
+    [Parameter] public int SelectedFilesCount { get; set; }
+    [Parameter] public bool HasMoreNodes { get; set; }
+    [Parameter] public int RemainingNodesCount { get; set; }
+
+    [Parameter] public string WorkspaceFilesText { get; set; } = string.Empty;
+    [Parameter] public string CreateFolderText { get; set; } = string.Empty;
+    [Parameter] public string UploadText { get; set; } = string.Empty;
+    [Parameter] public string DownloadAllText { get; set; } = string.Empty;
+    [Parameter] public string DownloadShortText { get; set; } = string.Empty;
+    [Parameter] public string NoWorkspaceText { get; set; } = string.Empty;
+    [Parameter] public string StartConversationText { get; set; } = string.Empty;
+    [Parameter] public string MoveText { get; set; } = string.Empty;
+    [Parameter] public string CopyText { get; set; } = string.Empty;
+    [Parameter] public string DeleteText { get; set; } = string.Empty;
+    [Parameter] public string CancelText { get; set; } = string.Empty;
+    [Parameter] public string SelectAllText { get; set; } = string.Empty;
+
+    [Parameter] public Func<int, string> SelectedItemsTextFactory { get; set; } = _ => string.Empty;
+    [Parameter] public Func<int, string> LoadMoreTextFactory { get; set; } = _ => string.Empty;
+
+    [Parameter] public RenderFragment? FileNodes { get; set; }
+
+    [Parameter] public EventCallback OnShowCreateFolder { get; set; }
+    [Parameter] public EventCallback<InputFileChangeEventArgs> OnFileUpload { get; set; }
+    [Parameter] public EventCallback OnDownloadAll { get; set; }
+    [Parameter] public EventCallback OnToggleSelectAll { get; set; }
+    [Parameter] public EventCallback OnClearSelection { get; set; }
+    [Parameter] public EventCallback<string> OnBatchOperation { get; set; }
+    [Parameter] public EventCallback OnLoadMoreNodes { get; set; }
+    [Parameter] public EventCallback OnScroll { get; set; }
+}
