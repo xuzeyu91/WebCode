@@ -17,7 +17,7 @@
 
 ```bash
 # 1. 克隆代码
-git clone https://github.com/xuzeyu91/WebCode.git
+git clone https://github.com/shuyu-labs/WebCode.git
 cd WebCode
 
 # 2. 一键启动
@@ -70,7 +70,7 @@ docker compose version
 
 ```bash
 # 克隆代码
-git clone https://github.com/xuzeyu91/WebCode.git
+git clone https://github.com/shuyu-labs/WebCode.git
 cd WebCode
 
 # 一键启动
@@ -518,7 +518,7 @@ if [ -d "WebCode" ]; then
     cd WebCode
     git pull origin main
 else
-    git clone https://github.com/xuzeyu91/WebCode.git
+    git clone https://github.com/shuyu-labs/WebCode.git
     cd WebCode
 fi
 

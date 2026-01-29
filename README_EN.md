@@ -140,7 +140,7 @@ On first install, you will be guided through the setup page (/setup) to complete
 
 ```bash
 # Clone the project
-git clone https://github.com/xuzeyu91/WebCode.git
+git clone https://github.com/shuyu-labs/WebCode.git
 cd WebCode
 
 # One-click start
@@ -165,7 +165,7 @@ docker compose up -d
 
 ```bash
 # Clone the project
-git clone https://github.com/xuzeyu91/WebCode.git
+git clone https://github.com/shuyu-labs/WebCode.git
 cd WebCode
 
 # Restore dependencies

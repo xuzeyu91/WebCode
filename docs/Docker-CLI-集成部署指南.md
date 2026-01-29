@@ -68,7 +68,7 @@ sudo systemctl enable docker
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/xuzeyu91/WebCode.git
+git clone https://github.com/shuyu-labs/WebCode.git
 cd WebCode
 ```
 

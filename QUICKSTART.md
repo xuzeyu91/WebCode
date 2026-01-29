@@ -17,7 +17,7 @@ docker-compose up -d
 ### 1. 克隆代码
 
 ```bash
-git clone https://github.com/xuzeyu91/WebCode.git
+git clone https://github.com/shuyu-labs/WebCode.git
 cd WebCode
 ```
 
@@ -164,5 +164,5 @@ docker-compose up -d
 
 ## 📞 技术支持
 
-- GitHub Issues: https://github.com/xuzeyu91/WebCode/issues
-- 文档: https://github.com/xuzeyu91/WebCode
+- GitHub Issues: https://github.com/shuyu-labs/WebCode/issues
+- 文档: https://github.com/shuyu-labs/WebCode

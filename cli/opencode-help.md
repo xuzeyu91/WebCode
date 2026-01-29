@@ -568,7 +568,7 @@ opencode --log-level DEBUG
 - [OpenCode 文档](https://opencode.ai/docs/)
 - [OpenCode GitHub 仓库](https://github.com/anomalyco/opencode)
 - [Models.dev](https://models.dev/) - 模型集成平台
-- [WebCode 项目主页](https://github.com/xuzeyu91/WebCode)
+- [WebCode 项目主页](https://github.com/shuyu-labs/WebCode)
 
 ## 支持与反馈
 

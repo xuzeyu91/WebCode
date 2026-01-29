@@ -140,7 +140,7 @@ WebCode 针对移动设备进行了全面优化：
 
 ```bash
 # 克隆项目
-git clone https://github.com/xuzeyu91/WebCode.git
+git clone https://github.com/shuyu-labs/WebCode.git
 cd WebCode
 
 # 一键启动
@@ -165,7 +165,7 @@ docker compose up -d
 
 ```bash
 # 克隆项目
-git clone https://github.com/xuzeyu91/WebCode.git
+git clone https://github.com/shuyu-labs/WebCode.git
 cd WebCode
 
 # 恢复依赖

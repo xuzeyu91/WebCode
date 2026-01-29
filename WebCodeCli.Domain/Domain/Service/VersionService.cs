@@ -34,8 +34,8 @@ public class GitHubReleaseResponse
 [ServiceDescription(typeof(IVersionService), ServiceLifetime.Scoped)]
 public class VersionService : IVersionService
 {
-    private const string GitHubApiUrl = "https://api.github.com/repos/xuzeyu91/WebCode/releases/latest";
-    private const string GitHubReleasesUrl = "https://github.com/xuzeyu91/WebCode/releases";
+    private const string GitHubApiUrl = "https://api.github.com/repos/shuyu-labs/WebCode/releases/latest";
+    private const string GitHubReleasesUrl = "https://github.com/shuyu-labs/WebCode/releases";
     
     // 缓存机制
     private static VersionCheckResult? _cachedResult;
