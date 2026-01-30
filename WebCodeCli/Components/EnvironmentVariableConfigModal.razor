@@ -244,10 +244,10 @@
 
         try
         {
-            // 过滤掉空的键值对
+            // 过滤掉空的键或空的值的环境变量，只保存有实际值的配置
             var validEnvVars = _envVars
-                .Where(ev => !string.IsNullOrWhiteSpace(ev.Key))
-                .ToDictionary(ev => ev.Key.Trim(), ev => ev.Value?.Trim() ?? string.Empty);
+                .Where(ev => !string.IsNullOrWhiteSpace(ev.Key) && !string.IsNullOrWhiteSpace(ev.Value))
+                .ToDictionary(ev => ev.Key.Trim(), ev => ev.Value!.Trim());
 
             var success = await CliToolEnvironmentService.SaveEnvironmentVariablesAsync(_selectedTool.Id, validEnvVars);
             

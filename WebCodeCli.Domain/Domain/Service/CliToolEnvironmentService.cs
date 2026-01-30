@@ -63,11 +63,14 @@ public class CliToolEnvironmentService : ICliToolEnvironmentService
             // 尝试从数据库读取
             var dbEnvVars = await _repository.GetEnvironmentVariablesByToolIdAsync(toolId);
             
-            // 如果数据库中有配置,则使用数据库配置
+            // 如果数据库中有配置,则使用数据库配置（过滤空值）
             if (dbEnvVars.Any())
             {
                 _logger.LogInformation("从数据库加载工具 {ToolId} 的环境变量配置", toolId);
-                return dbEnvVars;
+                // 过滤掉空值的环境变量，避免空字符串覆盖系统默认配置
+                return dbEnvVars
+                    .Where(kvp => !string.IsNullOrWhiteSpace(kvp.Value))
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             }
 
             // 否则从appsettings读取
@@ -75,7 +78,10 @@ public class CliToolEnvironmentService : ICliToolEnvironmentService
             if (tool?.EnvironmentVariables != null && tool.EnvironmentVariables.Any())
             {
                 _logger.LogInformation("从配置文件加载工具 {ToolId} 的环境变量配置", toolId);
-                return new Dictionary<string, string>(tool.EnvironmentVariables);
+                // 同样过滤掉空值
+                return tool.EnvironmentVariables
+                    .Where(kvp => !string.IsNullOrWhiteSpace(kvp.Value))
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             }
 
             return new Dictionary<string, string>();

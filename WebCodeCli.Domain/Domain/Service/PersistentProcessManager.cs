@@ -125,11 +125,16 @@ public class PersistentProcessManager : IDisposable
             WorkingDirectory = workingDirectory
         };
 
-        // 设置环境变量 - 只有在有实际变量需要设置时才修改(避免覆盖默认继承)
+        // 设置环境变量 - 只有在有实际值的变量才设置(避免空值覆盖系统默认配置)
         if (environmentVariables != null && environmentVariables.Count > 0)
         {
             foreach (var kvp in environmentVariables)
             {
+                // 跳过空值的环境变量，避免覆盖系统中已存在的配置
+                if (string.IsNullOrWhiteSpace(kvp.Value))
+                {
+                    continue;
+                }
                 startInfo.EnvironmentVariables[kvp.Key] = kvp.Value;
             }
             

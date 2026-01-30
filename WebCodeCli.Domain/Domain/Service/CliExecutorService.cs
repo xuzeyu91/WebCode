@@ -36,6 +36,10 @@ public class CliExecutorService : ICliExecutorService
     // 存储每个会话的CLI Thread ID（适用于所有CLI工具）
     private readonly Dictionary<string, string> _cliThreadIds = new();
     private readonly object _cliSessionLock = new();
+    
+    // Codex 配置文件缓存（避免每次执行都重新生成）
+    private string? _lastCodexConfigHash;
+    private readonly object _codexConfigLock = new();
 
     public CliExecutorService(
         ILogger<CliExecutorService> logger,
@@ -272,6 +276,13 @@ public class CliExecutorService : ICliExecutorService
         
         // 获取环境变量(优先从数据库)
         var environmentVariables = await GetToolEnvironmentVariablesAsync(tool.Id);
+        
+        // 对于 Codex 工具，需要根据环境变量动态生成配置文件
+        // 因为 Codex CLI 优先读取配置文件而非环境变量
+        if (string.Equals(tool.Id, "codex", StringComparison.OrdinalIgnoreCase))
+        {
+            GenerateCodexConfigFile(environmentVariables);
+        }
         
         // 获取适配器
         var adapter = _adapterFactory.GetAdapter(tool);
@@ -622,6 +633,13 @@ public class CliExecutorService : ICliExecutorService
         // 获取环境变量(优先从数据库)
         var environmentVariables = await GetToolEnvironmentVariablesAsync(tool.Id);
         
+        // 对于 Codex 工具，需要根据环境变量动态生成配置文件
+        // 因为 Codex CLI 优先读取配置文件而非环境变量
+        if (string.Equals(tool.Id, "codex", StringComparison.OrdinalIgnoreCase))
+        {
+            GenerateCodexConfigFile(environmentVariables);
+        }
+        
         _logger.LogInformation("执行 CLI 工具: {Tool}, 会话: {Session}, 工作目录: {Workspace}, 命令: {Command} {Arguments}", 
             tool.Name, sessionId, sessionWorkspace, commandPath, arguments);
 
@@ -649,11 +667,17 @@ public class CliExecutorService : ICliExecutorService
             startInfo.WorkingDirectory = sessionWorkspace;
         }
 
-        // 设置环境变量 - 只有在有实际变量需要设置时才修改(避免覆盖默认继承)
+        // 设置环境变量 - 只有在有实际值的变量才设置(避免空值覆盖系统默认配置)
         if (environmentVariables != null && environmentVariables.Count > 0)
         {
             foreach (var kvp in environmentVariables)
             {
+                // 跳过空值的环境变量，避免覆盖系统中已存在的配置
+                if (string.IsNullOrWhiteSpace(kvp.Value))
+                {
+                    _logger.LogDebug("跳过空值环境变量: {Key}", kvp.Key);
+                    continue;
+                }
                 startInfo.EnvironmentVariables[kvp.Key] = kvp.Value;
                 _logger.LogDebug("设置环境变量: {Key} = {Value}", kvp.Key, kvp.Value);
             }
@@ -1583,7 +1607,20 @@ public class CliExecutorService : ICliExecutorService
         {
             using var scope = _serviceProvider.CreateScope();
             var envService = scope.ServiceProvider.GetRequiredService<ICliToolEnvironmentService>();
-            return await envService.GetEnvironmentVariablesAsync(toolId);
+            var envVars = await envService.GetEnvironmentVariablesAsync(toolId);
+            
+            // 记录获取到的环境变量（用于调试）
+            _logger.LogInformation("获取工具 {ToolId} 的环境变量，共 {Count} 个", toolId, envVars.Count);
+            foreach (var kvp in envVars)
+            {
+                // 敏感信息只显示前几个字符
+                var maskedValue = kvp.Value.Length > 8 
+                    ? kvp.Value.Substring(0, 4) + "****" 
+                    : "****";
+                _logger.LogDebug("  环境变量: {Key} = {Value}", kvp.Key, maskedValue);
+            }
+            
+            return envVars;
         }
         catch (Exception ex)
         {
@@ -1610,6 +1647,104 @@ public class CliExecutorService : ICliExecutorService
         {
             _logger.LogError(ex, "保存工具 {ToolId} 的环境变量失败", toolId);
             return false;
+        }
+    }
+
+    /// <summary>
+    /// 为 Codex CLI 动态生成配置文件
+    /// Codex CLI 优先读取配置文件而非环境变量，因此需要在执行前根据数据库中的环境变量生成配置文件
+    /// 使用哈希值缓存，只在配置变化时才重新生成文件
+    /// </summary>
+    private void GenerateCodexConfigFile(Dictionary<string, string> envVars)
+    {
+        try
+        {
+            // 从环境变量中提取配置值
+            var baseUrl = envVars.GetValueOrDefault("CODEX_BASE_URL", "https://api.antsk.cn/v1");
+            var model = envVars.GetValueOrDefault("CODEX_MODEL", "glm-4.7");
+            var profile = envVars.GetValueOrDefault("CODEX_PROFILE", "webcode");
+            var providerName = envVars.GetValueOrDefault("CODEX_PROVIDER_NAME", "webcode codex");
+            var wireApi = envVars.GetValueOrDefault("CODEX_WIRE_API", "chat");
+            var approvalPolicy = envVars.GetValueOrDefault("CODEX_APPROVAL_POLICY", "never");
+            var reasoningEffort = envVars.GetValueOrDefault("CODEX_MODEL_REASONING_EFFORT", "medium");
+            var sandboxMode = envVars.GetValueOrDefault("CODEX_SANDBOX_MODE", "danger-full-access");
+            
+            // 计算配置哈希值（不包含时间戳）
+            var configKey = $"{baseUrl}|{model}|{profile}|{providerName}|{wireApi}|{approvalPolicy}|{reasoningEffort}|{sandboxMode}";
+            var configHash = configKey.GetHashCode().ToString();
+            
+            // 检查配置是否变化
+            lock (_codexConfigLock)
+            {
+                if (_lastCodexConfigHash == configHash)
+                {
+                    _logger.LogDebug("Codex 配置未变化，跳过生成配置文件");
+                    return;
+                }
+                _lastCodexConfigHash = configHash;
+            }
+            
+            // 确定 Codex 配置目录
+            var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+            {
+                // 在 Docker 中可能需要使用 /home/appuser
+                var appUserHome = "/home/appuser";
+                if (Directory.Exists(appUserHome))
+                {
+                    homeDir = appUserHome;
+                }
+            }
+            
+            var codexConfigDir = Path.Combine(homeDir, ".codex");
+            var codexConfigFile = Path.Combine(codexConfigDir, "config.toml");
+            
+            // 确保目录存在
+            if (!Directory.Exists(codexConfigDir))
+            {
+                Directory.CreateDirectory(codexConfigDir);
+            }
+            
+            // 生成配置文件内容（不包含动态时间戳，便于比较）
+            var configContent = $@"# Codex CLI 配置文件（由 WebCode 动态生成）
+
+model = ""{model}""
+model_reasoning_effort = ""{reasoningEffort}""
+
+profile = ""{profile}""
+windows_wsl_setup_acknowledged = true
+
+[model_providers.{profile}]
+name = ""{providerName}""
+base_url = ""{baseUrl}""
+env_key = ""NEW_API_KEY""
+wire_api = ""{wireApi}""
+
+
+[profiles.{profile}]
+# 深度模型
+model = ""{model}""
+# provider id
+model_provider = ""{profile}""
+# 审批策略
+approval_policy = ""{approvalPolicy}""
+# 推理强度
+model_reasoning_effort = ""{reasoningEffort}""
+# 推理总结粒度
+model_reasoning_summary = ""detailed""
+# 是否强制开启推理总结
+model_supports_reasoning_summaries = true
+model_reasoning_summary_format = ""experimental""
+sandbox_mode = ""{sandboxMode}""
+";
+            
+            // 写入配置文件
+            File.WriteAllText(codexConfigFile, configContent);
+            _logger.LogInformation("已生成 Codex 配置文件: {Path}, BaseUrl: {BaseUrl}", codexConfigFile, baseUrl);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "生成 Codex 配置文件失败");
         }
     }
 
