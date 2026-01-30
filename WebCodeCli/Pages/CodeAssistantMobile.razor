@@ -76,46 +76,9 @@
         </button>
     }
     
-    <!-- PWA 安装提示横幅 (显示在底部Tab栏上方) -->
-    @if ((_showPwaInstallPrompt || _showIosPwaGuide || _showManualInstallGuide) && !_isPwaInstalled)
-    {
-        <div class="flex-shrink-0 bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-white text-xs font-medium">@T("pwa.addToHomeScreen")</p>
-                    @if (_isIosDevice)
-                    {
-                        <p class="text-white/70 text-[10px]">@T("pwa.iosStep1") → @T("pwa.iosStep2")</p>
-                    }
-                    else
-                    {
-                        <p class="text-white/70 text-[10px]">@T("pwa.installDescription")</p>
-                    }
-                </div>
-                @if (_showPwaInstallPrompt && !_isIosDevice)
-                {
-                    <button @onclick="TriggerPwaInstall"
-                            class="flex-shrink-0 px-3 py-1.5 bg-white text-blue-600 rounded-lg text-xs font-semibold">
-                        @T("pwa.install")
-                    </button>
-                }
-                <button @onclick="DismissIosPwaGuide"
-                        class="flex-shrink-0 w-6 h-6 flex items-center justify-center text-white/60 hover:text-white">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    }
     
     <!-- 底部Tab栏 -->
-    <nav class="flex-shrink-0 bg-white border-t border-gray-200 safe-area-bottom">
+    <nav class="flex-shrink-0 bg-white border-t border-gray-200 safe-area-bottom relative z-40">
         <div class="flex items-center justify-around h-16">
             @foreach (var tab in _tabs)
             {
@@ -399,7 +362,7 @@
             </div>
             
             <!-- 固定底部输入区 -->
-            <div class="fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 p-3 safe-area-bottom z-30">
+            <div class="fixed left-0 right-0 bg-white border-t border-gray-200 p-3 z-30" style="bottom: calc(4rem + env(safe-area-inset-bottom, 0px))">
                 <!-- 快捷操作按钮 -->
                 <div class="flex items-center gap-2 mb-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
                     <button @onclick="ToggleQuickActions"
@@ -888,6 +851,27 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                     </button>
+                </div>
+                
+                <!-- 官网链接 -->
+                <div class="mx-4 bg-white rounded-2xl shadow-sm overflow-hidden">
+                    <a href="https://wc.tree456.com/" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       class="flex items-center gap-4 px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">@T("codeAssistant.officialWebsite")</p>
+                            <p class="text-xs text-gray-500">wc.tree456.com</p>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </a>
                 </div>
                 
                 <!-- GitHub链接 -->
