@@ -368,7 +368,9 @@
     "downloadAll": "すべてダウンロード",
     "downloadAllDesc": "ワークスペースのすべてのファイルをZIPでダウンロード",
     "errorOccurred": "エラーが発生しました",
-    "quickActions": "クイックアクション"
+    "quickActions": "クイックアクション",
+    "viewDetails": "詳細を表示",
+    "hideDetails": "詳細を非表示"
   },
   "envConfig": {
     "title": "環境変数を設定",

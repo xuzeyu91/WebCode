@@ -368,7 +368,9 @@
     "downloadAll": "모두 다운로드",
     "downloadAllDesc": "작업 공간의 모든 파일을 ZIP으로 다운로드",
     "errorOccurred": "오류가 발생했습니다",
-    "quickActions": "빠른 작업"
+    "quickActions": "빠른 작업",
+    "viewDetails": "세부 정보 보기",
+    "hideDetails": "세부 정보 숨기기"
   },
   "envConfig": {
     "title": "환경 변수 설정",

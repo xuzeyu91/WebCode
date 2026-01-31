@@ -321,7 +321,9 @@
     "downloadAll": "Download All",
     "downloadAllDesc": "Download all workspace files as a zip",
     "errorOccurred": "Error occurred",
-    "quickActions": "Quick Actions"
+    "quickActions": "Quick Actions",
+    "viewDetails": "View Details",
+    "hideDetails": "Hide Details"
   },
   "envConfig": {
     "title": "Environment Variables",

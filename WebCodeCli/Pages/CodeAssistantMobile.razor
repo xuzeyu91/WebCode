@@ -49,9 +49,6 @@
             case "chat":
                 @RenderChatView()
                 break;
-            case "output":
-                @RenderOutputView()
-                break;
             case "files":
                 @RenderFilesView()
                 break;
@@ -86,10 +83,6 @@
                         class="flex-1 flex flex-col items-center justify-center h-full gap-1 transition-colors @(tab.Key == _activeTab ? "text-blue-600" : "text-gray-500 active:text-gray-700")">
                     <div class="relative tab-icon">
                         @((MarkupString)tab.Icon)
-                        @if (tab.Key == "output" && _isLoading)
-                        {
-                            <span class="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                        }
                     </div>
                     <span class="text-xs font-medium">@tab.Label</span>
                 </button>
@@ -309,9 +302,15 @@
                 }
                 else
                 {
-                    @foreach (var message in _messages)
+                    @for (var i = 0; i < _messages.Count; i++)
                     {
-                        <div class="@(message.Role == "user" ? "flex justify-end" : "flex justify-start")">
+                        var message = _messages[i];
+                        var messageIndex = i;
+                        var isAssistant = message.Role == "assistant";
+                        var hasOutputDetails = isAssistant && _isJsonlOutputActive && _jsonlEvents.Any();
+                        var isExpanded = IsMessageExpanded(messageIndex);
+                        
+                        <div class="@(message.Role == "user" ? "flex justify-end" : "flex justify-start flex-col items-start")">
                             <div class="@(message.Role == "user" 
                                           ? "bg-blue-600 text-white rounded-2xl rounded-br-md max-w-[85%]" 
                                           : "bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-bl-md max-w-[85%] shadow-sm") px-4 py-3">
@@ -332,16 +331,73 @@
                                         }
                                     </div>
                                 }
-                                <div class="@(message.Role == "user" ? "text-blue-200" : "text-gray-400") text-xs mt-1 text-right">
-                                    @message.CreatedAt.ToString("HH:mm")
+                                <div class="flex items-center justify-between mt-1">
+                                    <div class="@(message.Role == "user" ? "text-blue-200" : "text-gray-400") text-xs">
+                                        @message.CreatedAt.ToString("HH:mm")
+                                    </div>
+                                    @* AI回复显示查看详情按钮 *@
+                                    @if (isAssistant && hasOutputDetails && messageIndex == _messages.Count - 1)
+                                    {
+                                        <button @onclick="() => ToggleMessageDetails(messageIndex)"
+                                                class="text-xs text-blue-500 hover:text-blue-600 flex items-center gap-1 ml-2">
+                                            @if (isExpanded)
+                                            {
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                                <span>@T("codeAssistant.hideDetails")</span>
+                                            }
+                                            else
+                                            {
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                                <span>@T("codeAssistant.viewDetails")</span>
+                                            }
+                                        </button>
+                                    }
                                 </div>
                             </div>
+                            
+                            @* 内嵌输出详情面板 *@
+                            @if (isAssistant && isExpanded && hasOutputDetails && messageIndex == _messages.Count - 1)
+                            {
+                                <div class="mt-2 w-full max-w-[95%] animate-slideUp">
+                                    <div class="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                                        <!-- 进度追踪器 -->
+                                        <div class="px-3 py-2 border-b border-gray-200 bg-white">
+                                            <ProgressTracker @ref="_progressTracker" CanCancel="true" OnCancel="CancelExecution" />
+                                        </div>
+                                        <!-- 输出内容 -->
+                                        <div class="max-h-[50vh] overflow-auto">
+                                            <OutputResultPanel 
+                                                ContainerId="mobile-inline-output-container"
+                                                HasOutputEvents="@(_isJsonlOutputActive && _jsonlEvents.Any())"
+                                                TotalEventCount="@_jsonlEvents.Count"
+                                                DisplayedEventCount="@Math.Min(_displayedEventCount, _jsonlEvents.Count)"
+                                                InitialDisplayCount="@InitialDisplayCount"
+                                                ActiveThreadId="@_activeThreadId"
+                                                HasMoreEvents="@_hasMoreEvents"
+                                                IsLoading="@_isLoading"
+                                                EventGroups="@ConvertToOutputEventGroups(GetPagedJsonlEventGroups())"
+                                                RawOutput="@_rawOutput"
+                                                EmptyTitle="@T("codeAssistant.noOutput")"
+                                                EmptyDescription="@T("codeAssistant.executeCode")"
+                                                CopyLabel="@T("common.copy")"
+                                                OnLoadMore="LoadMoreEvents"
+                                                OnToggleGroupCallback="HandleToggleGroupCallback"
+                                                IsGroupOpenFunc="@(g => IsOutputGroupOpen(g))"
+                                                OnAnswerQuestion="HandleAnswerQuestion" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                     
                     @if (_isLoading)
                     {
-                        <div class="flex justify-start">
+                        <div class="flex justify-start flex-col items-start">
                             <div class="bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-bl-md max-w-[85%] shadow-sm px-4 py-3">
                                 @if (!string.IsNullOrEmpty(_currentAssistantMessage))
                                 {
@@ -358,7 +414,64 @@
                                         <span class="text-sm text-gray-500">@T("codeAssistant.thinking")</span>
                                     </div>
                                 }
+                                @* 实时查看详情按钮 *@
+                                @if (_isJsonlOutputActive && _jsonlEvents.Any())
+                                {
+                                    <div class="flex items-center justify-end mt-2 pt-2 border-t border-gray-100">
+                                        <button @onclick="() => ToggleMessageDetails(-1)"
+                                                class="text-xs text-blue-500 hover:text-blue-600 flex items-center gap-1">
+                                            @if (IsMessageExpanded(-1))
+                                            {
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                </svg>
+                                                <span>@T("codeAssistant.hideDetails")</span>
+                                            }
+                                            else
+                                            {
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                                <span>@T("codeAssistant.viewDetails")</span>
+                                            }
+                                        </button>
+                                    </div>
+                                }
                             </div>
+                            
+                            @* 实时输出详情面板 *@
+                            @if (_isJsonlOutputActive && _jsonlEvents.Any() && IsMessageExpanded(-1))
+                            {
+                                <div class="mt-2 w-full max-w-[95%] animate-slideUp">
+                                    <div class="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                                        <!-- 进度追踪器 -->
+                                        <div class="px-3 py-2 border-b border-gray-200 bg-white">
+                                            <ProgressTracker @ref="_progressTracker" CanCancel="true" OnCancel="CancelExecution" />
+                                        </div>
+                                        <!-- 输出内容 -->
+                                        <div class="max-h-[50vh] overflow-auto">
+                                            <OutputResultPanel 
+                                                ContainerId="mobile-realtime-output-container"
+                                                HasOutputEvents="@(_isJsonlOutputActive && _jsonlEvents.Any())"
+                                                TotalEventCount="@_jsonlEvents.Count"
+                                                DisplayedEventCount="@Math.Min(_displayedEventCount, _jsonlEvents.Count)"
+                                                InitialDisplayCount="@InitialDisplayCount"
+                                                ActiveThreadId="@_activeThreadId"
+                                                HasMoreEvents="@_hasMoreEvents"
+                                                IsLoading="@_isLoading"
+                                                EventGroups="@ConvertToOutputEventGroups(GetPagedJsonlEventGroups())"
+                                                RawOutput="@_rawOutput"
+                                                EmptyTitle="@T("codeAssistant.noOutput")"
+                                                EmptyDescription="@T("codeAssistant.executeCode")"
+                                                CopyLabel="@T("common.copy")"
+                                                OnLoadMore="LoadMoreEvents"
+                                                OnToggleGroupCallback="HandleToggleGroupCallback"
+                                                IsGroupOpenFunc="@(g => IsOutputGroupOpen(g))"
+                                                OnAnswerQuestion="HandleAnswerQuestion" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                 }

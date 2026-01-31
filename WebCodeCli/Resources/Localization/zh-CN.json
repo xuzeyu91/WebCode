@@ -321,7 +321,9 @@
     "downloadAll": "下载全部",
     "downloadAllDesc": "将工作区所有文件打包下载",
     "errorOccurred": "发生错误",
-    "quickActions": "快捷操作"
+    "quickActions": "快捷操作",
+    "viewDetails": "查看详情",
+    "hideDetails": "收起详情"
   },
   "envConfig": {
     "title": "配置环境变量",
