@@ -363,11 +363,7 @@
                             @if (isAssistant && isExpanded && hasOutputDetails && messageIndex == _messages.Count - 1)
                             {
                                 <div class="mt-2 w-full max-w-[95%] animate-slideUp">
-                                    <div class="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                                        <!-- 进度追踪器 -->
-                                        <div class="px-3 py-2 border-b border-gray-200 bg-white">
-                                            <ProgressTracker @ref="_progressTracker" CanCancel="true" OnCancel="CancelExecution" />
-                                        </div>
+                                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                         <!-- 输出内容 -->
                                         <div class="max-h-[50vh] overflow-auto">
                                             <OutputResultPanel 
@@ -443,11 +439,7 @@
                             @if (_isJsonlOutputActive && _jsonlEvents.Any() && IsMessageExpanded(-1))
                             {
                                 <div class="mt-2 w-full max-w-[95%] animate-slideUp">
-                                    <div class="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                                        <!-- 进度追踪器 -->
-                                        <div class="px-3 py-2 border-b border-gray-200 bg-white">
-                                            <ProgressTracker @ref="_progressTracker" CanCancel="true" OnCancel="CancelExecution" />
-                                        </div>
+                                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                         <!-- 输出内容 -->
                                         <div class="max-h-[50vh] overflow-auto">
                                             <OutputResultPanel 
